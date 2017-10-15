@@ -1,3 +1,27 @@
+from sumy.summarizers.sum_basic import SumBasicSummarizer as Summarizer
+from sumy.parsers.html import HtmlParser
+from sumy.parsers.plaintext import PlaintextParser
+from sumy.nlp.tokenizers import Tokenizer
+from sumy.nlp.stemmers import Stemmer
+from sumy.utils import get_stop_words
+
+from sklearn.model_selection import train_test_split, cross_val_score
+from sklearn.ensemble import GradientBoostingClassifier
+from nltk.tag import StanfordPOSTagger, StanfordNERTagger
+from nltk import word_tokenize, pos_tag
+from collections import Counter
+from itertools import chain
+import requests
+from bs4 import BeautifulSoup as bs
+import unicodedata
+import pandas as pd
+import numpy as np
+import string
+import pickle
+import re
+import pandas
+import nltk
+
 def get_answer_pos(tagged_question, tagged_sentence, answer):
     answer_lenth = len(answer.split())
     indexes = [i for i, t in enumerate(tagged_question) if (t[0] == '' or t[0] == '_' or t[0] == "'_")]
@@ -164,3 +188,12 @@ def predict_best_question(questions):
             max_pred = pred
             best_q_index = i
     return (questions[best_q_index], max_pred)
+
+def get_best_sentences(document, num=1):
+    sentence_count = num
+    parser = PlaintextParser(article, Tokenizer('english'))
+    stemmer = Stemmer('english')
+    summarizer = Summarizer(stemmer)
+    summarizer.stop_words = get_stop_words('english')
+    
+    return summarizer(parser.document, sentence_count)
