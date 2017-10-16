@@ -113,9 +113,6 @@ def tag_sentence(sentence, tagger='standard'):
         pos = pos_tag(wt)
         return pos
 
-def extract_pattern(tree, pattern):
-    return [(index, list(t)) for index, t in enumerate(tree) if type(t) == nltk.tree.Tree]
-
 def get_trees(sentence, patterns):
     tagged_sentence = tag_sentence(sentence)
     forest = []
