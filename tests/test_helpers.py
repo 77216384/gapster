@@ -64,3 +64,12 @@ class HelpersTest(unittest.TestCase):
 	def test_get_trees_returns_tagged_sentence(self):
 		tagged_sentence = helpers.get_trees(self.sentence, helpers.get_top_patterns(3))[0]
 		self.assertEqual(self.tagged_sentence, tagged_sentence)
+
+	def test_blankify_generates_proper_object_for_one_question(self):
+		tree = helpers.get_trees(self.sentence, helpers.get_top_patterns(3))[1][0]
+		self.assertEqual(helpers.blankify(tree)[1], test_data.sample_question)
+
+	def test_make_all_questions_generates_list_of_dicts(self):
+		output = helpers.make_all_questions(self.sentence, helpers.get_top_patterns(3))
+		is_a_dict = [True if type(item) == dict else False for item in output]
+		self.assertTrue(all(is_a_dict))

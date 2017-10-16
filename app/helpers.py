@@ -5,14 +5,10 @@ from sumy.nlp.tokenizers import Tokenizer
 from sumy.nlp.stemmers import Stemmer
 from sumy.utils import get_stop_words
 
-from sklearn.model_selection import train_test_split, cross_val_score
-from sklearn.ensemble import GradientBoostingClassifier
 from nltk.tag import StanfordPOSTagger, StanfordNERTagger
 from nltk import word_tokenize, pos_tag
 from collections import Counter
 from itertools import chain
-import requests
-from bs4 import BeautifulSoup as bs
 import unicodedata
 import pandas as pd
 import numpy as np
