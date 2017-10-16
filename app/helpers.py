@@ -177,21 +177,21 @@ def get_top_patterns(num=25):
      '24: {<DT><NNP><NNP><NNP>}', '25: {<NNP><NNP><NNP>}']
     return patterns[0:num]
 
-def predict_best_question(questions):
+def predict_best_question(questions, model):
     max_pred = 0
     best_q_index = 0
     for i, q in enumerate(questions):
-        meta = get_metadata(q['sentence'], q['tagged_sentence'], q['question'], q['tagged_question'], q1['answer'])
+        meta = get_metadata(q['sentence'], q['tagged_sentence'], q['question'], q['tagged_question'], q['answer'])
         sv = sentence_vectorizer(meta)
-        pred = gbc.predict_proba(sv.reshape(1, -1))[0][2]
+        pred = model.predict_proba(sv.reshape(1, -1))[0][2]
         if pred > max_pred:
             max_pred = pred
             best_q_index = i
     return (questions[best_q_index], max_pred)
 
-def get_best_sentences(document, num=1):
+def get_best_sentences(text, num=1):
     sentence_count = num
-    parser = PlaintextParser(article, Tokenizer('english'))
+    parser = PlaintextParser(text, Tokenizer('english'))
     stemmer = Stemmer('english')
     summarizer = Summarizer(stemmer)
     summarizer.stop_words = get_stop_words('english')
