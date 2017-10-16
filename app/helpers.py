@@ -21,6 +21,7 @@ import pickle
 import re
 import pandas
 import nltk
+import copy
 
 def get_answer_pos(tagged_question, tagged_sentence, answer):
     answer_lenth = len(answer.split())
@@ -29,11 +30,8 @@ def get_answer_pos(tagged_question, tagged_sentence, answer):
     ending_index = starting_index+answer_lenth-1
     return [tag[1] for tag in tagged_sentence[starting_index:ending_index+1]]
 
-def get_answer_depth(sentence, answer):
-    try:
-        return sentence.index(answer)/len(sentence)
-    except:
-        return sentence.index(answer.split()[0])/len(sentence)
+def get_answer_depth(question):
+    return question.split().index('_')/len(question.split())
 
 def get_context_pos(tagged_question, tagged_sentence, answer):
     answer_lenth = len(answer.split())
@@ -62,12 +60,12 @@ def get_metadata(sentence, tagged_sentence, question, tagged_question, answer):
     answer_pos = get_answer_pos(tagged_question, tagged_sentence, answer)
     word_count = get_answer_word_count(sentence, answer)
     context_pos = get_context_pos(tagged_question, tagged_sentence, answer)
-    answer_depth = get_answer_depth(sentence, answer)
+    answer_depth = get_answer_depth(question)
     answer_length = len(answer.split())
     return ({'answer_pos': answer_pos[0:5], 'word_count': word_count[0:5], 'context_pos': context_pos, 'answer_depth': answer_depth, 'answer_length': answer_length})
 
 def answer_pos_vectorizer(metadata):
-    answer_pos = metadata['answer_pos']
+    answer_pos = copy.deepcopy(metadata)['answer_pos']
     pos_tags = ['CC', 'CD', 'DT', 'EX', 'FW', 'IN', 'JJ', 'JJR', 'JJS', 'LS', 'MD', 'NN', 'NNS', 'NNP', 'NNPS', 'PDT', 'POS', 'PRP', 'PRP$', 'RB', 'RBR', 'RBS', 'RP', 'SYM', 'TO', 'UH', 'VB', 'VBD', 'VBG', 'VBN', 'VBP', 'VBZ', 'WDT', 'WP', 'WP$', 'WRB', 'PUNCT']
     
     if len(answer_pos) < 5:
@@ -89,7 +87,7 @@ def word_count_vectorizer(metadata):
     return np.array(word_count)
 
 def context_pos_vectorizer(metadata):
-    context_pos = metadata['context_pos']
+    context_pos = copy.deepcopy(metadata)['context_pos']
     pos_tags = ['CC', 'CD', 'DT', 'EX', 'FW', 'IN', 'JJ', 'JJR', 'JJS', 'LS', 'MD', 'NN', 'NNS', 'NNP', 'NNPS', 'PDT', 'POS', 'PRP', 'PRP$', 'RB', 'RBR', 'RBS', 'RP', 'SYM', 'TO', 'UH', 'VB', 'VBD', 'VBG', 'VBN', 'VBP', 'VBZ', 'WDT', 'WP', 'WP$', 'WRB', 'PUNCT']
 
     vectors = [[1 if context_pos[index] == tag else 0 for tag in pos_tags] for index in range(4)]
