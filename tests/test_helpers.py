@@ -1,4 +1,5 @@
 import unittest
+import nltk
 import numpy as np
 from app import helpers
 import tests.data as test_data
@@ -51,4 +52,15 @@ class HelpersTest(unittest.TestCase):
 	def test_context_pos_vectorizer(self):
 		self.assertTrue(np.array_equal(self.context_pos_vector, helpers.context_pos_vectorizer(self.metadata)))
 
-	
+	def test_get_trees_returns_correct_number_of_trees(self):
+		trees = helpers.get_trees(self.sentence, helpers.get_top_patterns(3))[1]
+		self.assertEqual(3, len(trees))
+
+	def test_get_trees_returns_list_of_nltk_trees(self):
+		trees = helpers.get_trees(self.sentence, helpers.get_top_patterns(3))[1]
+		is_a_tree = [True if type(item) == nltk.tree.Tree else False for item in trees]
+		self.assertTrue(all(is_a_tree))
+
+	def test_get_trees_returns_tagged_sentence(self):
+		tagged_sentence = helpers.get_trees(self.sentence, helpers.get_top_patterns(3))[0]
+		self.assertEqual(self.tagged_sentence, tagged_sentence)
