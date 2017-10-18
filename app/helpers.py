@@ -250,3 +250,25 @@ def make_choices(text, pattern, answer):
 
     return choices
 
+def ner_chunker(ner):
+    chunked_ner = []
+    # first step is to chunk
+    for i, tag in enumerate(ner):
+        if i == 0:
+            chunked_ner.append(list(tag))
+        elif tag[1] != 'O' and tag[1] == chunked_ner[-1][1]:
+            chunked_ner[-1][0] += " "+tag[0]
+        else:
+            chunked_ner.append(list(tag))
+    return chunked_ner
+
+def make_ner_dict(chunked_ner):
+    ner_dict = {}
+    for tag in chunked_ner:
+        if tag[1] != 'O':
+            if tag[1] in ner_dict:
+                ner_dict[tag[1]].append(tag[0])
+            else:
+                ner_dict[tag[1]] = [tag[0]]
+    return ner_dict
+
