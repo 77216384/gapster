@@ -24,7 +24,7 @@ def make_question():
 			questions += helpers.make_all_questions(str(sentence), helpers.get_top_patterns())
 		
 		best_questions = helpers.predict_best_question(questions, gbc, top_n=5)
-		choices = helpers.make_choices(text, best_questions[0][0]['pattern'], best_questions[0][0]['answer'])
+		choices = helpers.make_choices(text, best_questions[3][0]['pattern'], best_questions[3][0]['answer'])
 		return "\n".join([q[0]['question'] for q in best_questions])
 
 

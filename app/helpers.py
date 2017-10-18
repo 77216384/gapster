@@ -9,7 +9,6 @@ import unicodedata
 import gensim.models.word2vec as w2v
 import multiprocessing
 
-
 from nltk.tag import StanfordPOSTagger, StanfordNERTagger
 from nltk import word_tokenize, pos_tag
 from collections import Counter
@@ -199,13 +198,16 @@ def get_best_sentences(text, num=1):
     
     return summarizer(parser.document, sentence_count)
 
+def unpunkt(text):
+    return "".join([c if unicodedata.category(c)[0] != 'P' else ' ' for c in text])
+
 def get_word2vec(text):
     tokenizer = nltk.data.load('tokenizers/punkt/english.pickle')
     raw_sentences = tokenizer.tokenize(text)
     clean_sentences = []
 
     for sentence in raw_sentences:
-        unpunkt = "".join([c if unicodedata.category(c)[0] != 'P' else ' ' for c in sentence ])
+        unpunkt = "".join([c if unicodedata.category(c)[0] != 'P' else '' for c in sentence ])
         clean_sentences.append(nltk.word_tokenize(unpunkt))
 
     num_features = 200
@@ -228,18 +230,23 @@ def make_choices(text, pattern, answer):
     tree = cp.parse(tagged_text)
     indexes = [i for i, t in enumerate(tree) if type(t) == nltk.tree.Tree]
     pattern_matches = []
-    for index in indexes:
-        pattern_matches.append(" ".join([t[0] for t in tree[index]]))
-    print(pattern_matches)
 
+    for index in indexes:
+        phrase = " ".join([t[0] for t in tree[index]])
+        pattern_matches.append(unpunkt(phrase))
+
+    print(pattern_matches)
     choices = []
 
     for match in pattern_matches:
-        words = unpunkt(match).split()
-        score = sum([text2vec.similarity(word, answer.split()[i]) for i, word in enumerate(words)])
-        choices.append((match, score))
+        try:
+            words = unpunkt(match).split()
+            score = sum([text2vec.similarity(word, unpunkt(answer).split()[i]) for i, word in enumerate(words)])
+            choices.append((match, score))
+        except:
+            print("word rejected")
 
-    print(choices)
+    print(sorted(choices, key=lambda x: x[1], reverse=True))
 
     return choices
 
