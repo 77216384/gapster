@@ -252,7 +252,6 @@ def make_choices(text, pattern, answer):
 
 def ner_chunker(ner):
     chunked_ner = []
-    # first step is to chunk
     for i, tag in enumerate(ner):
         if i == 0:
             chunked_ner.append(list(tag))
@@ -272,3 +271,17 @@ def make_ner_dict(chunked_ner):
                 ner_dict[tag[1]] = [tag[0]]
     return ner_dict
 
+def get_answer_ner(answer):
+    ner = get_ner7(answer)
+    return [tag[1] for tag in ner][0]
+
+def get_ner_alternatives(text, answer):
+    answer_ner = get_answer_ner(answer)
+    if answer_ner != 'O':
+        ner = get_ner7(text)
+        chunked_ner = ner_chunker(ner)
+        ner_dict = make_ner_dict(chunked_ner)
+        alternatives = [alt for alt in ner_dict[answer_ner] if answer not in alt]
+    else:
+        alternatives = []
+    return set(alternatives)
