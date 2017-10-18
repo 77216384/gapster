@@ -5,7 +5,7 @@ from flask import Flask, render_template, request, redirect
 
 app = Flask(__name__)
 
-with open('gapGBCmodel.pickle', 'rb') as f:
+with open('gbc_optimal.pickle', 'rb') as f:
     gbc = pickle.load(f)
 
 @app.route("/")
@@ -17,12 +17,15 @@ def make_question():
 	if request.is_json:
 		data = request.get_json() # data will be a python dict
 		text = data['text']
-		sentence = str(helpers.get_best_sentences(text)[0])
-		questions = helpers.make_all_questions(sentence, helpers.get_top_patterns())
-		best_question = helpers.predict_best_question(questions, gbc)
-		return best_question[0]['question']
-	else:
-		return "Error: Request not in JSON format."
+		sentences = helpers.get_best_sentences(text, num=5)
+		questions = [] 
+		
+		for sentence in sentences:
+			questions += helpers.make_all_questions(str(sentence), helpers.get_top_patterns())
+		
+		best_questions = helpers.predict_best_question(questions, gbc, top_n=5)
+		choices = helpers.make_choices(text, best_questions[0][0]['pattern'], best_questions[0][0]['answer'])
+		return "\n".join([q[0]['question'] for q in best_questions])
 
 
 if __name__ == '__main__':

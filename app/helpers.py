@@ -5,6 +5,11 @@ from sumy.nlp.tokenizers import Tokenizer
 from sumy.nlp.stemmers import Stemmer
 from sumy.utils import get_stop_words
 
+import unicodedata
+import gensim.models.word2vec as w2v
+import multiprocessing
+
+
 from nltk.tag import StanfordPOSTagger, StanfordNERTagger
 from nltk import word_tokenize, pos_tag
 from collections import Counter
@@ -115,7 +120,7 @@ def get_trees(sentence, patterns):
     for pattern in patterns:
         cp = nltk.RegexpParser(pattern)
         tree = cp.parse(tagged_sentence)
-        forest.append(tree)
+        forest.append((tree, pattern))
     return (tagged_sentence, forest)
 
 def blankify(tree_list):
@@ -145,9 +150,13 @@ def make_all_questions(sentence, patterns):
     tagged_sentence, all_matches = get_trees(sentence, patterns)
     all_question_combos = []
     for tree in all_matches:
-        list_tree = [list(b)for b in tree]
+        list_tree = [list(b)for b in tree[0]]
         questions = blankify(list_tree)
+
+        for question in questions:
+            question.update({'pattern': tree[1]})
         all_question_combos.append(questions)
+
     all_questions_faltten = []
     for combo in all_question_combos:
         if len(combo) == 1:
@@ -168,17 +177,18 @@ def get_top_patterns(num=25):
      '24: {<DT><NNP><NNP><NNP>}', '25: {<NNP><NNP><NNP>}']
     return patterns[0:num]
 
-def predict_best_question(questions, model):
+def predict_best_question(questions, model, top_n=1):
     max_pred = 0
     best_q_index = 0
+    predictions = []
     for i, q in enumerate(questions):
         meta = get_metadata(q['sentence'], q['tagged_sentence'], q['question'], q['tagged_question'], q['answer'])
         sv = sentence_vectorizer(meta)
         pred = model.predict_proba(sv.reshape(1, -1))[0][2]
-        if pred > max_pred:
-            max_pred = pred
-            best_q_index = i
-    return (questions[best_q_index], max_pred)
+        predictions.append((q, pred))
+        top_questions = sorted(predictions, key=lambda x: x[1], reverse=True)[:top_n]
+        #print(top_questions)
+    return top_questions
 
 def get_best_sentences(text, num=1):
     sentence_count = num
@@ -188,3 +198,48 @@ def get_best_sentences(text, num=1):
     summarizer.stop_words = get_stop_words('english')
     
     return summarizer(parser.document, sentence_count)
+
+def get_word2vec(text):
+    tokenizer = nltk.data.load('tokenizers/punkt/english.pickle')
+    raw_sentences = tokenizer.tokenize(text)
+    clean_sentences = []
+
+    for sentence in raw_sentences:
+        unpunkt = "".join([c if unicodedata.category(c)[0] != 'P' else ' ' for c in sentence ])
+        clean_sentences.append(nltk.word_tokenize(unpunkt))
+
+    num_features = 200
+    min_word_count = 1
+    num_workers = multiprocessing.cpu_count()
+    context_size = 3
+    downsampling = 1e-3
+
+    text2vec = w2v.Word2Vec(sg=0, workers=num_workers, size=num_features, min_count=min_word_count, window=context_size, sample=downsampling)
+
+    text2vec.build_vocab(clean_sentences)
+    text2vec.train(clean_sentences, total_examples=text2vec.corpus_count, epochs=text2vec.iter)
+
+    return text2vec
+
+def make_choices(text, pattern, answer):
+    text2vec = get_word2vec(text)
+    tagged_text = tag_sentence(text)
+    cp = nltk.RegexpParser(pattern)
+    tree = cp.parse(tagged_text)
+    indexes = [i for i, t in enumerate(tree) if type(t) == nltk.tree.Tree]
+    pattern_matches = []
+    for index in indexes:
+        pattern_matches.append(" ".join([t[0] for t in tree[index]]))
+    print(pattern_matches)
+
+    choices = []
+
+    for match in pattern_matches:
+        words = unpunkt(match).split()
+        score = sum([text2vec.similarity(word, answer.split()[i]) for i, word in enumerate(words)])
+        choices.append((match, score))
+
+    print(choices)
+
+    return choices
+
