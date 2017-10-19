@@ -240,13 +240,26 @@ def make_pattern_distractors(text, pattern, answer):
     choices = []
 
     for match in pattern_matches:
-        try:
-            score = get_distractor_similarity(text, pos_tag(word_tokenize(answer)), match)
-            phrase = " ".join(t[0] for t in match)
-            choices.append((phrase, score))
-        except:
-            print("word rejected", match)
+        score = get_distractor_similarity(text, pos_tag(word_tokenize(answer)), match)
+        phrase = " ".join(t[0] for t in match)
+        choices.append((phrase, score))
 
+    
+    if 'JJ' in pattern:
+        try:
+            index = [i for i, t in enumerate(pos_tag(word_tokenize(answer))) if t[1] == 'JJ'][0]
+            adj = answer.split()[index]
+            adj_syn = wn.synsets(adj, pos='a')[0]
+            antonym = adj_syn.lemmas()[0].antonyms()[0].name()
+            a = answer.split()
+            a[index] = antonym
+            whole_antonym = " ".join(a)
+        except:
+            whole_antonym = None
+        
+    if whole_antonym != None:
+        choices.append((whole_antonym, 100))
+        
     return sorted(choices, key=lambda x: x[1], reverse=True)
 
 def ner_chunker(ner):
@@ -287,7 +300,6 @@ def get_ner_distractors(text, answer):
 
 def get_distractor_similarity(text, tagged_answer, tagged_distractor):
     # answers and distractors will all be the same length and have the same POS pattern
-
     pos_dict = {
         'NNP': 'n',
         'NN': 'n',
@@ -296,7 +308,7 @@ def get_distractor_similarity(text, tagged_answer, tagged_distractor):
         'VBD': 'v',
         'VB': 'v',
     }
-
+    
     noun_indexes = [i for i, tup in enumerate(tagged_answer) if pos_dict[tup[1]] == 'n']
     
     cumulative_score = 0
@@ -305,14 +317,18 @@ def get_distractor_similarity(text, tagged_answer, tagged_distractor):
         #answer_syn = lesk(word_tokenize(text), answer_word, 'n')
         answer_syn = wn.synsets(answer_word, pos='n')[0]
         for i in noun_indexes:
-            distractor_word = tagged_distractor[i][0]
-            #distractor_syn = lesk(word_tokenize(text), distractor_word, 'n')
-            distractor_syn = wn.synsets(distractor_word, pos='n')[0]
-            score = wn.lch_similarity(answer_syn, distractor_syn)
-            if score == None:
-                cumulative_score += 0
-            else:
-                cumulative_score += score
+            try:
+                distractor_word = tagged_distractor[i][0]
+                #distractor_syn = lesk(word_tokenize(text), distractor_word, 'n')
+                distractor_syn = wn.synsets(distractor_word, pos='n')[0]
+                score = wn.lch_similarity(answer_syn, distractor_syn)
+                if score == None:
+                    cumulative_score += 0
+                else:
+                    cumulative_score += score
+            except:
+                print("Error", tagged_distractor)
+        
         
     return cumulative_score/len(noun_indexes)**2
 
