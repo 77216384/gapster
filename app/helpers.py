@@ -10,6 +10,7 @@ import gensim.models.word2vec as w2v
 import multiprocessing
 
 from nltk.tag import StanfordPOSTagger, StanfordNERTagger
+from nltk.wsd import lesk
 from nltk import word_tokenize, pos_tag
 from collections import Counter
 from itertools import chain
