@@ -281,7 +281,36 @@ def get_ner_alternatives(text, answer):
         ner = get_ner7(text)
         chunked_ner = ner_chunker(ner)
         ner_dict = make_ner_dict(chunked_ner)
-        alternatives = [alt for alt in ner_dict[answer_ner] if answer not in alt]
+        alternatives = set([alt for alt in ner_dict[answer_ner] if answer not in alt])
     else:
         alternatives = []
     return set(alternatives)
+
+def get_distractor_similarity(text, tagged_answer, tagged_distractor):
+    # answers and distractors will all be the same length and have the same POS pattern
+
+    pos_dict = {
+        'NNP': 'n',
+        'NN': 'n',
+        'NNS': 'n',
+        'JJ': 'a',
+        'VBD': 'v',
+        'VB': 'v',
+    }
+
+    noun_indexes = [i for i, tup in enumerate(tagged_answer) if pos_dict[tup[1]] == 'n']
+    
+    cumulative_score = 0
+    for index in noun_indexes:
+        answer_word = tagged_answer[index][0]
+        answer_syn = lesk(text, answer_word, 'n')
+        for i in noun_indexes:
+            distractor_word = tagged_distractor[i][0]
+            distractor_syn = lesk(text, distractor_word, 'n')
+            score = wn.lch_similarity(answer_syn, distractor_syn)
+            if score == None:
+                cumulative_score += 0
+            else:
+                cumulative_score += score
+        
+    return cumulative_score/len(noun_indexes)**2
