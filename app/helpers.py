@@ -224,32 +224,30 @@ def get_word2vec(text):
 
     return text2vec
 
-def make_choices(text, pattern, answer):
-    text2vec = get_word2vec(text)
-    tagged_text = tag_sentence(text)
+def make_pattern_distractors(text, pattern, answer):
+    tagged_text = pos_tag(word_tokenize(text))
     cp = nltk.RegexpParser(pattern)
     tree = cp.parse(tagged_text)
     indexes = [i for i, t in enumerate(tree) if type(t) == nltk.tree.Tree]
     pattern_matches = []
 
     for index in indexes:
-        phrase = " ".join([t[0] for t in tree[index]])
-        pattern_matches.append(unpunkt(phrase))
+        tag = [t for t in tree[index]]
+        if tag not in pattern_matches:
+            pattern_matches.append(tag)
 
-    print(pattern_matches)
+    #print(pattern_matches)
     choices = []
 
     for match in pattern_matches:
         try:
-            words = unpunkt(match).split()
-            score = sum([text2vec.similarity(word, unpunkt(answer).split()[i]) for i, word in enumerate(words)])
-            choices.append((match, score))
+            score = get_distractor_similarity(text, pos_tag(word_tokenize(answer)), match)
+            phrase = " ".join(t[0] for t in match)
+            choices.append((phrase, score))
         except:
-            print("word rejected")
+            print("word rejected", match)
 
-    print(sorted(choices, key=lambda x: x[1], reverse=True))
-
-    return choices
+    return sorted(choices, key=lambda x: x[1], reverse=True)
 
 def ner_chunker(ner):
     chunked_ner = []
@@ -276,7 +274,7 @@ def get_answer_ner(answer):
     ner = get_ner7(answer)
     return [tag[1] for tag in ner][0]
 
-def get_ner_alternatives(text, answer):
+def get_ner_distractors(text, answer):
     answer_ner = get_answer_ner(answer)
     if answer_ner != 'O':
         ner = get_ner7(text)
@@ -304,10 +302,12 @@ def get_distractor_similarity(text, tagged_answer, tagged_distractor):
     cumulative_score = 0
     for index in noun_indexes:
         answer_word = tagged_answer[index][0]
-        answer_syn = lesk(text, answer_word, 'n')
+        #answer_syn = lesk(word_tokenize(text), answer_word, 'n')
+        answer_syn = wn.synsets(answer_word, pos='n')[0]
         for i in noun_indexes:
             distractor_word = tagged_distractor[i][0]
-            distractor_syn = lesk(text, distractor_word, 'n')
+            #distractor_syn = lesk(word_tokenize(text), distractor_word, 'n')
+            distractor_syn = wn.synsets(distractor_word, pos='n')[0]
             score = wn.lch_similarity(answer_syn, distractor_syn)
             if score == None:
                 cumulative_score += 0
@@ -315,3 +315,18 @@ def get_distractor_similarity(text, tagged_answer, tagged_distractor):
                 cumulative_score += score
         
     return cumulative_score/len(noun_indexes)**2
+
+def make_distractors(text, answer):
+    # 1. check for NERs
+    # 2. check for noun-noun similarities within the document
+    # 3. generate distractors from synset hyper/hypo nyms
+
+    # check for NERs
+    ner_distractors = get_ner_alternatives(text, answer)
+    if ner_distractors >= 3:
+        return ner_distractors
+
+
+
+
+
