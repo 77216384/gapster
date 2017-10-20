@@ -11,6 +11,7 @@ import multiprocessing
 
 from nltk.tag import StanfordPOSTagger, StanfordNERTagger
 from nltk.wsd import lesk
+from nltk.corpus import wordnet as wn
 from nltk import word_tokenize, pos_tag
 from collections import Counter
 from itertools import chain
@@ -187,7 +188,6 @@ def predict_best_question(questions, model, top_n=1):
         pred = model.predict_proba(sv.reshape(1, -1))[0][2]
         predictions.append((q, pred))
         top_questions = sorted(predictions, key=lambda x: x[1], reverse=True)[:top_n]
-        #print(top_questions)
     return top_questions
 
 def get_best_sentences(text, num=1):
@@ -257,8 +257,8 @@ def make_pattern_distractors(text, pattern, answer):
         except:
             whole_antonym = None
         
-    if whole_antonym != None:
-        choices.append((whole_antonym, 100))
+        if whole_antonym != None:
+            choices.append((whole_antonym, 100))
         
     return sorted(choices, key=lambda x: x[1], reverse=True)
 
@@ -332,17 +332,37 @@ def get_distractor_similarity(text, tagged_answer, tagged_distractor):
         
     return cumulative_score/len(noun_indexes)**2
 
-def make_distractors(text, answer):
+def make_distractors(text, pattern, answer):
     # 1. check for NERs
     # 2. check for noun-noun similarities within the document
     # 3. generate distractors from synset hyper/hypo nyms
 
     # check for NERs
-    ner_distractors = get_ner_alternatives(text, answer)
-    if ner_distractors >= 3:
-        return ner_distractors
+    ner_distractors = get_ner_alternatives(text, answer)[0]
+    
+    if len(ner_distractors) > 0:
+        return ner_distractors[:3] # this won't break if there aren't 3 records!
+    else:
+        pattern_distractors = make_pattern_distractors(text, pattern, answer)
 
+    return pattern_distractors[1:5]
 
+def get_ner_alternatives(text, answer):
+    answer_ner = get_answer_ner(answer)
+    if answer_ner != 'O':
+        ner = get_ner7(text)
+        chunked_ner = ner_chunker(ner)
+        ner_dict = make_ner_dict(chunked_ner)
+        alternatives = set([alt for alt in ner_dict[answer_ner] if answer not in alt])
+    else:
+        alternatives = []
+    return [list(alternatives), answer_ner]
 
-
-
+def get_ner7(text):
+    wt = word_tokenize(text)
+    ner_model_seven = '/Users/alex/stanford-ner-2017-06-09/classifiers/english.muc.7class.distsim.crf.ser.gz'
+    ner_jar = '/Users/alex/stanford-ner-2017-06-09/stanford-ner.jar'
+    st_ner7 = StanfordNERTagger(ner_model_seven, ner_jar)
+    ner7 = st_ner7.tag(wt)
+    
+    return ner7

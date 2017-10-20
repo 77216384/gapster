@@ -1,6 +1,7 @@
 import helpers
 import pickle
-from flask import Flask, render_template, request, redirect
+import json
+from flask import Flask, render_template, request, redirect, jsonify
 
 
 app = Flask(__name__)
@@ -24,8 +25,11 @@ def make_question():
 			questions += helpers.make_all_questions(str(sentence), helpers.get_top_patterns())
 		
 		best_questions = helpers.predict_best_question(questions, gbc, top_n=5)
-		choices = helpers.make_choices(text, best_questions[3][0]['pattern'], best_questions[3][0]['answer'])
-		return "\n".join([q[0]['question'] for q in best_questions])
+		distractors = helpers.make_distractors(text, best_questions[3][0]['pattern'], best_questions[3][0]['answer'])
+		question = best_questions[3][0]['question']
+		answer = best_questions[3][0]['answer']
+		output = {'question': question, 'distractors': distractors, 'answer': answer}
+		return jsonify(output)
 
 
 if __name__ == '__main__':
