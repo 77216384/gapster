@@ -176,7 +176,7 @@ def get_top_patterns(num=25):
      '15: {<VBG>}', '16: {<DT><NNS>}', '17: {<VB>}', '18: {<JJ>}', '19: {<NN><NNS>}',
      '20: {<NN><NN>}', '21: {<JJ><NNP>}', '22: {<PRP>}', '23: {<DT><NNP><NN>}',
      '24: {<DT><NNP><NNP><NNP>}', '25: {<NNP><NNP><NNP>}']
-    return patterns[0:num]
+    return patterns[1:num]
 
 def predict_best_question(questions, model, top_n=1):
     max_pred = 0
