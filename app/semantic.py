@@ -111,16 +111,7 @@ class Blanker(object):
                     blanked_sentence += ('_'+token.whitespace_)
                 else:
                     blanked_sentence += (token.text+token.whitespace_)
-            #blanked_sentence = " ".join(blanked_sentence)
-            #blanked_sentence = re.sub('\s\'', "'", blanked_sentence)
-            #blanked_sentence = re.sub('\s\.', '.', blanked_sentence)
-            #blanked_sentence = re.sub('\s,', ',', blanked_sentence)
-            #blanked_sentence = re.sub('\s;', ';', blanked_sentence)
-            #blanked_sentence = re.sub('\s\?', '?', blanked_sentence)
-            #blanked_sentence = re.sub('\s:', ':', blanked_sentence)
-            #blanked_sentence = re.sub('\s\$', '$', blanked_sentence)
-            #blanked_sentence = re.sub('\s\%', '%', blanked_sentence)
-            #blanked_sentence = re.sub('\s\!', '!', blanked_sentence)
+                    
             all_blanks.append(blanked_sentence)
 
         return all_blanks
