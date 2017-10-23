@@ -1,4 +1,5 @@
 from __future__ import unicode_literals, division, print_function
+from semantic import Blanker
 import helpers
 import pickle
 import json
@@ -7,8 +8,8 @@ from flask import Flask, render_template, request, redirect, jsonify
 
 app = Flask(__name__)
 
-with open('gbc_optimal.pickle', 'rb') as f:
-    gbc = pickle.load(f)
+with open('lr_opt2.pickle', 'rb') as f:
+    lr = pickle.load(f)
 
 @app.route("/")
 def index():
@@ -23,10 +24,10 @@ def make_question():
 		questions = [] 
 		
 		for sentence in sentences:
-			b = Blankify(sentence)
+			b = Blanker(sentence)
 			questions += b.blanks
 		
-		best_questions = helpers.predict_best_question(questions, gbc, top_n=5)
+		best_questions = helpers.predict_best_question(questions, lr, top_n=5)
 		#distractors = helpers.make_distractors(text, best_questions[3][0]['pattern'], best_questions[3][0]['answer'])
 		question = best_questions[0][0]['question']
 		answer = best_questions[0][0]['answer']

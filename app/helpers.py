@@ -1,4 +1,6 @@
 #from sumy.summarizers.sum_basic import SumBasicSummarizer as Summarizer
+from __future__ import unicode_literals, division, print_function
+
 from semantic import *
 
 from sumy.summarizers.lsa import LsaSummarizer as Summarizer
@@ -9,13 +11,13 @@ from sumy.nlp.stemmers import Stemmer
 from sumy.utils import get_stop_words
 
 import unicodedata
-import gensim.models.word2vec as w2v
+#import gensim.models.word2vec as w2v
 import multiprocessing
 
-from nltk.tag import StanfordPOSTagger, StanfordNERTagger
-from nltk.wsd import lesk
-from nltk.corpus import wordnet as wn
-from nltk import word_tokenize, pos_tag
+#from nltk.tag import StanfordPOSTagger, StanfordNERTagger
+#from nltk.wsd import lesk
+#from nltk.corpus import wordnet as wn
+#from nltk import word_tokenize, pos_tag
 from collections import Counter
 from itertools import chain
 import unicodedata
@@ -185,7 +187,7 @@ def predict_best_question(questions, model, top_n=1):
     max_pred = 0
     predictions = []
     for i, q in enumerate(questions):
-        question_vector = Sentence(q['sentence'], q['question'], q['answer']).vector()
+        question_vector = SemanticSentence(q['sentence'], q['question'], q['answer']).vector()
         pred = model.predict_proba(question_vector.reshape(1, -1))[0][1]
         predictions.append((q, pred))
         top_questions = sorted(predictions, key=lambda x: x[1], reverse=True)[:top_n]
@@ -198,7 +200,7 @@ def get_best_sentences(text, num=1):
     summarizer = Summarizer(stemmer)
     summarizer.stop_words = get_stop_words('english')
     
-    return summarizer(parser.document, sentence_count)
+    return [unicode(s) for s in summarizer(parser.document, sentence_count)]
 
 def unpunkt(text):
     return "".join([c if unicodedata.category(c)[0] != 'P' else ' ' for c in text])

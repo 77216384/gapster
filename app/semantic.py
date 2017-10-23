@@ -13,7 +13,7 @@ import re
 
 nlp = spacy.load('en_core_web_md')
 
-class Sentence(object):
+class SemanticSentence(object):
     def __init__(self, sentence, question, answer):
         self.raw_sentence = sentence
         self.raw_question = question
@@ -109,7 +109,9 @@ class Blanker(object):
         self.blanks = self.make_blanks()
     
     def make_blanks(self):
-        good_tags = [u'NNP', u'NN', u'DT NN', u'NNS', u'CD', u'DT JJ NN', u'JJ NNS', u'NNP NNP', u'DT NN NN', u'DT NNP NNP', u'JJ NN', u'DT NNP', u'NN NN', u'NN NNS', u'JJ', u'CD NNS', u'DT NNS', u'VBD', u'DT NNPS', u'NNP POS', u'VB', u'JJ NNP', u'DT NNP NNP NNP', u'DT JJ NNS', u'DT NNP NN', u'CD NNP', u'NNP NNP NNP', u'DT JJ JJ NN', u'VBG', u'NNP CC NNP', u'NNP NN', u'DT NNP IN NNP', u'JJ NN NNS', u'DT JJ NN NN', u'NNP CD , CD', u'NNP CD', u'DT NNP NNP NNP NNP', u'NNP NNS', u'FW', u'PRP$ NNS']
+        #good_tags = [u'NNP', u'NN', u'DT NN', u'NNS', u'CD', u'DT JJ NN', u'JJ NNS', u'NNP NNP', u'DT NN NN', u'DT NNP NNP', u'JJ NN', u'DT NNP', u'NN NN', u'NN NNS', u'JJ', u'CD NNS', u'DT NNS', u'VBD', u'DT NNPS', u'NNP POS', u'VB', u'JJ NNP', u'DT NNP NNP NNP', u'DT JJ NNS', u'DT NNP NN', u'CD NNP', u'NNP NNP NNP', u'DT JJ JJ NN', u'VBG', u'NNP CC NNP', u'NNP NN', u'DT NNP IN NNP', u'JJ NN NNS', u'DT JJ NN NN', u'NNP CD , CD', u'NNP CD', u'DT NNP NNP NNP NNP', u'NNP NNS', u'FW', u'PRP$ NNS']
+        good_tags = [u'CD', u'JJ', u'VB', u'VBG', u'FW']
+
         #iterate thru some list of patterns
         matcher = spacy.matcher.Matcher(nlp.vocab)
 
@@ -118,9 +120,17 @@ class Blanker(object):
 
         matches = matcher(self.spacy) # this has to be a spacy blanked_sentence, so we have to run nlp(sentence) to get this
 
+        noun_ent_matches = []
+        for chunk in self.spacy.noun_chunks:
+            noun_ent_matches.append((0,0, chunk.start, chunk.end))
+        for ent in self.spacy.ents:
+            noun_ent_matches.append((0,0, ent.start, ent.end))
+        for match in matches:
+            noun_ent_matches.append(match)
+
         # now we need to generate the actual question sentences with blanks, this is just for one sentence
         all_blanks = []
-        for m in matches:
+        for m in noun_ent_matches:
             answer = ""
             blanked_sentence = ""
             for i, token in enumerate(self.spacy):
