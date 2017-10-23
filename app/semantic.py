@@ -105,13 +105,14 @@ class Blanker(object):
         # now we need to generate the actual question sentences with blanks, this is just for one sentence
         all_blanks = []
         for m in matches:
+            answer = ""
             blanked_sentence = ""
             for i, token in enumerate(self.spacy):
                 if i in xrange(m[2], m[3]):
+                    answer += (token.text+token.whitespace_)
                     blanked_sentence += ('_'+token.whitespace_)
                 else:
                     blanked_sentence += (token.text+token.whitespace_)
-                    
-            all_blanks.append(blanked_sentence)
+            all_blanks.append({'question': blanked_sentence, 'answer': answer, 'sentece': self.spacy.text})
 
         return all_blanks
