@@ -27,10 +27,11 @@ def make_question():
 			questions += b.blanks
 		
 		best_questions = helpers.predict_best_question(questions, gbc, top_n=5)
-		distractors = helpers.make_distractors(text, best_questions[3][0]['pattern'], best_questions[3][0]['answer'])
-		question = best_questions[3][0]['question']
-		answer = best_questions[3][0]['answer']
-		output = {'question': question, 'distractors': distractors, 'answer': answer}
+		#distractors = helpers.make_distractors(text, best_questions[3][0]['pattern'], best_questions[3][0]['answer'])
+		question = best_questions[0][0]['question']
+		answer = best_questions[0][0]['answer']
+		#output = {'question': question, 'distractors': distractors, 'answer': answer}
+		output = {'question': question, 'answer': answer}
 		return jsonify(output)
 
 
