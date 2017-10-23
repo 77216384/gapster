@@ -86,3 +86,41 @@ class Sentence(object):
             vector += list(([tag] == np.array(self.all_ner_tags)).astype('int'))
         vector += list(([tag] == np.array(self.all_srl_labels)).astype('int'))
         return np.array(vector)
+
+class Blanker(object):
+    def __init__(self, raw_text):
+        self.spacy = nlp(raw_text)
+        self.blanks = self.make_blanks()
+    
+    def make_blanks(self):
+        good_tags = [u'NNP', u'NN', u'DT NN', u'NNS', u'CD', u'DT JJ NN', u'JJ NNS', u'NNP NNP', u'DT NN NN', u'DT NNP NNP', u'JJ NN', u'DT NNP', u'NN NN', u'NN NNS', u'JJ', u'CD NNS', u'DT NNS', u'VBD', u'DT NNPS', u'NNP POS', u'VB', u'JJ NNP', u'DT NNP NNP NNP', u'DT JJ NNS', u'DT NNP NN', u'CD NNP', u'NNP NNP NNP', u'DT JJ JJ NN', u'VBG', u'NNP CC NNP', u'NNP NN', u'DT NNP IN NNP', u'JJ NN NNS', u'DT JJ NN NN', u'NNP CD , CD', u'NNP CD', u'DT NNP NNP NNP NNP', u'NNP NNS', u'FW', u'PRP$ NNS']
+        #iterate thru some list of patterns
+        matcher = Matcher(nlp.vocab)
+
+        for i, pattern in enumerate(good_tags):
+            matcher.add_pattern("i", [{TAG: tag} for tag in pattern.split()])
+
+        matches = matcher(self.spacy) # this has to be a spacy blanked_sentence, so we have to run nlp(sentence) to get this
+
+        # now we need to generate the actual question sentences with blanks, this is just for one sentence
+        all_blanks = []
+        for m in matches:
+            blanked_sentence = ""
+            for i, token in enumerate(self.spacy):
+                if i in xrange(m[2], m[3]):
+                    blanked_sentence += ('_'+token.whitespace_)
+                else:
+                    blanked_sentence += (token.text+token.whitespace_)
+            #blanked_sentence = " ".join(blanked_sentence)
+            #blanked_sentence = re.sub('\s\'', "'", blanked_sentence)
+            #blanked_sentence = re.sub('\s\.', '.', blanked_sentence)
+            #blanked_sentence = re.sub('\s,', ',', blanked_sentence)
+            #blanked_sentence = re.sub('\s;', ';', blanked_sentence)
+            #blanked_sentence = re.sub('\s\?', '?', blanked_sentence)
+            #blanked_sentence = re.sub('\s:', ':', blanked_sentence)
+            #blanked_sentence = re.sub('\s\$', '$', blanked_sentence)
+            #blanked_sentence = re.sub('\s\%', '%', blanked_sentence)
+            #blanked_sentence = re.sub('\s\!', '!', blanked_sentence)
+            all_blanks.append(blanked_sentence)
+
+        return all_blanks
