@@ -1,4 +1,6 @@
 #from sumy.summarizers.sum_basic import SumBasicSummarizer as Summarizer
+from semantic import *
+
 from sumy.summarizers.lsa import LsaSummarizer as Summarizer
 from sumy.parsers.html import HtmlParser
 from sumy.parsers.plaintext import PlaintextParser
@@ -181,12 +183,10 @@ def get_top_patterns(num=25):
 
 def predict_best_question(questions, model, top_n=1):
     max_pred = 0
-    best_q_index = 0
     predictions = []
     for i, q in enumerate(questions):
-        meta = get_metadata(q['sentence'], q['tagged_sentence'], q['question'], q['tagged_question'], q['answer'])
-        sv = sentence_vectorizer(meta)
-        pred = model.predict_proba(sv.reshape(1, -1))[0][2]
+        question_vector = Sentence(q['sentence'], q['question'], q['answer']).vector()
+        pred = model.predict_proba(question_vector.reshape(1, -1))[0][1]
         predictions.append((q, pred))
         top_questions = sorted(predictions, key=lambda x: x[1], reverse=True)[:top_n]
     return top_questions

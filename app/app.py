@@ -23,7 +23,8 @@ def make_question():
 		questions = [] 
 		
 		for sentence in sentences:
-			questions += helpers.make_all_questions(str(sentence), helpers.get_top_patterns())
+			b = Blankify(sentence)
+			questions += b.blanks
 		
 		best_questions = helpers.predict_best_question(questions, gbc, top_n=5)
 		distractors = helpers.make_distractors(text, best_questions[3][0]['pattern'], best_questions[3][0]['answer'])
