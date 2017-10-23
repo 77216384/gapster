@@ -1,3 +1,18 @@
+from __future__ import unicode_literals, division, print_function
+
+import practnlptools
+from practnlptools.tools import Annotator
+from collections import Counter
+import pandas as pd
+import numpy as np
+import unicodedata
+import pickle
+import spacy
+import nltk
+import re
+
+nlp = spacy.load('en_core_web_md')
+
 class Sentence(object):
     def __init__(self, sentence, question, answer):
         self.raw_sentence = sentence
@@ -10,7 +25,8 @@ class Sentence(object):
         self.spacy_ques = nlp(self.raw_question)
         self.answer_length = self.set_answer_length()
         self.spacy_answer = self.set_spacy_answer()
-        self.srl = annotator.getAnnotations(self.ascii_sentence)['srl']
+        self.annotator=Annotator()
+        self.srl = self.annotator.getAnnotations(self.ascii_sentence)['srl']
         self.answer_pos = self.set_answer_pos()
         self.answer_ner = self.set_answer_ner()
         self.answer_ner_iob  = self.set_answer_ner_iob()
@@ -95,10 +111,10 @@ class Blanker(object):
     def make_blanks(self):
         good_tags = [u'NNP', u'NN', u'DT NN', u'NNS', u'CD', u'DT JJ NN', u'JJ NNS', u'NNP NNP', u'DT NN NN', u'DT NNP NNP', u'JJ NN', u'DT NNP', u'NN NN', u'NN NNS', u'JJ', u'CD NNS', u'DT NNS', u'VBD', u'DT NNPS', u'NNP POS', u'VB', u'JJ NNP', u'DT NNP NNP NNP', u'DT JJ NNS', u'DT NNP NN', u'CD NNP', u'NNP NNP NNP', u'DT JJ JJ NN', u'VBG', u'NNP CC NNP', u'NNP NN', u'DT NNP IN NNP', u'JJ NN NNS', u'DT JJ NN NN', u'NNP CD , CD', u'NNP CD', u'DT NNP NNP NNP NNP', u'NNP NNS', u'FW', u'PRP$ NNS']
         #iterate thru some list of patterns
-        matcher = Matcher(nlp.vocab)
+        matcher = spacy.matcher.Matcher(nlp.vocab)
 
         for i, pattern in enumerate(good_tags):
-            matcher.add_pattern("i", [{TAG: tag} for tag in pattern.split()])
+            matcher.add_pattern("i", [{spacy.attrs.TAG: tag} for tag in pattern.split()])
 
         matches = matcher(self.spacy) # this has to be a spacy blanked_sentence, so we have to run nlp(sentence) to get this
 
@@ -113,6 +129,6 @@ class Blanker(object):
                     blanked_sentence += ('_'+token.whitespace_)
                 else:
                     blanked_sentence += (token.text+token.whitespace_)
-            all_blanks.append({'question': blanked_sentence, 'answer': answer, 'sentece': self.spacy.text})
+            all_blanks.append({'question': blanked_sentence, 'answer': answer, 'sentence': self.spacy.text})
 
         return all_blanks
