@@ -24,9 +24,16 @@ def make_question():
 		data = request.get_json() # data will be a python dict
 		text = data['text']
 		sentences = helpers.get_best_sentences(text, num=5)
+		# add some code here to get srl labels so we don't have to do it each time
+		
+		sentences_with_srl = []
+		for s in sentences:
+			srl = helpers.get_srl(s)
+			sentences_with_srl.append({'sentence':s, 'srl':srl})
+
 		questions = [] 
 		
-		for sentence in sentences:
+		for sentence in sentences_with_srl:
 			b = Blanker(sentence, nlp)
 			questions += b.blanks
 		

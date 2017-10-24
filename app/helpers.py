@@ -11,6 +11,7 @@ from sumy.nlp.stemmers import Stemmer
 from sumy.utils import get_stop_words
 
 import unicodedata
+from practnlptools.tools import Annotator
 #import gensim.models.word2vec as w2v
 #import multiprocessing
 
@@ -187,7 +188,7 @@ def predict_best_question(questions, model, nlp, top_n=1):
     max_pred = 0
     predictions = []
     for i, q in enumerate(questions):
-        question_vector = SemanticSentence(q['sentence'], q['question'], q['answer'], nlp).vector()
+        question_vector = SemanticSentence(q['sentence'], q['question'], q['answer'], nlp, srl=q['srl']).vector()
         pred = model.predict_proba(question_vector.reshape(1, -1))[0][1]
         predictions.append((q, pred))
         top_questions = sorted(predictions, key=lambda x: x[1], reverse=True)[:top_n]
@@ -369,3 +370,8 @@ def get_ner7(text):
     ner7 = st_ner7.tag(wt)
     
     return ner7
+
+def get_srl(sentence):
+    ascii_sentence = unicodedata.normalize('NFKD', sentence).encode('ascii','ignore')
+    annotator=Annotator()
+    return annotator.getAnnotations(ascii_sentence)['srl']

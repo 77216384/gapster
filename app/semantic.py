@@ -55,24 +55,34 @@ class DistractorSet(object):
 
 
 class SemanticSentence(object):
-    def __init__(self, sentence, question, answer, nlp):
+    def __init__(self, sentence, question, answer, nlp, srl=None):
+        if srl == None:
+            self.ascii_sentence = unicodedata.normalize('NFKD', sentence).encode('ascii','ignore')
+            self.ascii_question = unicodedata.normalize('NFKD', question).encode('ascii','ignore')
+            self.ascii_answer = unicodedata.normalize('NFKD', answer).encode('ascii','ignore')
+            self.annotator=Annotator()
+            self.srl = self.annotator.getAnnotations(self.ascii_sentence)['srl']
+            self.answer_srl_label = self.set_answer_srl_label()
+        else:
+            self.srl = srl
+
         self.nlp = nlp
         self.raw_sentence = sentence
         self.raw_question = question
         self.raw_answer = answer
-        self.ascii_sentence = unicodedata.normalize('NFKD', sentence).encode('ascii','ignore')
-        self.ascii_question = unicodedata.normalize('NFKD', question).encode('ascii','ignore')
-        self.ascii_answer = unicodedata.normalize('NFKD', answer).encode('ascii','ignore')
+        #self.ascii_sentence = unicodedata.normalize('NFKD', sentence).encode('ascii','ignore')
+        #self.ascii_question = unicodedata.normalize('NFKD', question).encode('ascii','ignore')
+        #self.ascii_answer = unicodedata.normalize('NFKD', answer).encode('ascii','ignore')
         self.spacy_sent = self.nlp(self.raw_sentence)
         self.spacy_ques = self.nlp(self.raw_question)
         self.answer_length = self.set_answer_length()
         self.spacy_answer = self.set_spacy_answer()
-        self.annotator=Annotator()
-        self.srl = self.annotator.getAnnotations(self.ascii_sentence)['srl']
+        #self.annotator=Annotator()
+        #self.srl = self.annotator.getAnnotations(self.ascii_sentence)['srl']
         self.answer_pos = self.set_answer_pos()
         self.answer_ner = self.set_answer_ner()
         self.answer_ner_iob  = self.set_answer_ner_iob()
-        self.answer_srl_label = self.set_answer_srl_label()
+        #self.answer_srl_label = self.set_answer_srl_label()
         self.answer_depth = self.set_answer_depth()
         self.answer_word_count = self.set_answer_word_count()
         self.all_pos_tags = ['CC', 'CD', 'DT', 'EX', 'FW', 'IN', 'JJ', 'JJR', 'JJS', 'LS', 'MD', 'NN', 'NNS', 'NNP', 'NNPS', 'PDT', 'POS', 'PRP', 'PRP$', 'RB', 'RBR', 'RBS', 'RP', 'SYM', 'TO', 'UH', 'VB', 'VBD', 'VBG', 'VBN', 'VBP', 'VBZ', 'WDT', 'WP', 'WP$', 'WRB', 'PUNCT']
@@ -146,9 +156,10 @@ class SemanticSentence(object):
         return np.array(vector)
 
 class Blanker(object):
-    def __init__(self, raw_text, nlp):
+    def __init__(self, sent_with_srl, nlp):
         self.nlp = nlp
-        self.spacy = self.nlp(raw_text)
+        self.spacy = self.nlp(sent_with_srl['sentence'])
+        self.srl = sent_with_srl['srl']
         self.blanks = self.make_blanks()
         
     def make_blanks(self):
@@ -183,6 +194,6 @@ class Blanker(object):
                     blanked_sentence += ('_'+token.whitespace_)
                 else:
                     blanked_sentence += (token.text+token.whitespace_)
-            all_blanks.append({'question': blanked_sentence, 'answer': answer, 'sentence': self.spacy.text, 'spacy_answer': spacy_answer})
+            all_blanks.append({'question': blanked_sentence, 'answer': answer, 'sentence': self.spacy.text, 'spacy_answer': spacy_answer, 'srl':self.srl})
 
         return all_blanks
