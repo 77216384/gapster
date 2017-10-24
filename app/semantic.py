@@ -23,7 +23,6 @@ class DistractorSet(object):
         all_distractors = []
 
         matching_ents = [ent for ent in self.spacy.ents if ent.ent_id == answer.ent_id]
-        print(matching_ents)
 
         for ent in matching_ents:
             all_distractors.append(ent)

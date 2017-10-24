@@ -1,0 +1,27 @@
+.mainLogo {
+	width: 30vw;
+	margin: 2.5em auto;
+	display: block;
+}
+
+#demoText {
+	width: 50vw;
+	height: 25vh;
+	margin: 1em auto;
+	display: block;
+}
+
+#textSubmit {
+	margin: auto;
+	display: block;
+}
+
+#question {
+	margin: 3.5em auto;
+	text-align: center;
+}
+
+#answerSubmit {
+	margin: 1em auto;
+	display: block;	
+}
