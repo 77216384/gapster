@@ -11,7 +11,31 @@ import spacy
 import nltk
 import re
 
-nlp = spacy.load('en_core_web_md')
+#nlp = spacy.load('en_core_web_md')
+
+class DistractorSet(object):
+    def __init__(self, text):
+        self.raw_text = text
+        self.spacy = nlp(text)
+
+    def make_distractors(self, answer):
+        all_distractors = []
+        for ent in self.spacy.ents:
+            all_distractors.append((ent, answer.similarity(ent)))
+        for chunk in self.spacy.noun_chunks:
+            all_distractors.append((ent, answer.similarity(chunk)))
+
+        # make a Matcher for POS tags of answer
+        pos_tags = [w.tag_ for w in answer]
+        matcher = spacy.matcher.Matcher(nlp.vocab)
+        matcher.add_pattern("answer_pattern", [{spacy.attrs.TAG: tag} for tag in pos_tags])
+        matches = matcher(self.spacy)
+        for match in matches:
+            phrase = self.spacy[m[2]:m[3]]
+            all_distractors.append(phrase, answer.similarity(phrase))
+
+        return sorted(set(all_distractors, key = lambda x: x[1]))[:3]
+
 
 class SemanticSentence(object):
     def __init__(self, sentence, question, answer):
@@ -131,6 +155,7 @@ class Blanker(object):
         # now we need to generate the actual question sentences with blanks, this is just for one sentence
         all_blanks = []
         for m in noun_ent_matches:
+            spacy_answer = self.spacy[m[2]:m[3]]
             answer = ""
             blanked_sentence = ""
             for i, token in enumerate(self.spacy):
@@ -139,6 +164,6 @@ class Blanker(object):
                     blanked_sentence += ('_'+token.whitespace_)
                 else:
                     blanked_sentence += (token.text+token.whitespace_)
-            all_blanks.append({'question': blanked_sentence, 'answer': answer, 'sentence': self.spacy.text})
+            all_blanks.append({'question': blanked_sentence, 'answer': answer, 'sentence': self.spacy.text, 'spacy_answer': spacy_answer})
 
         return all_blanks
