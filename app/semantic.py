@@ -14,39 +14,57 @@ import re
 #nlp = spacy.load('en_core_web_md')
 
 class DistractorSet(object):
-    def __init__(self, text):
+    def __init__(self, text, nlp):
+        self.nlp = nlp
         self.raw_text = text
-        self.spacy = nlp(text)
+        self.spacy = self.nlp(text)
 
     def make_distractors(self, answer):
         all_distractors = []
-        for ent in self.spacy.ents:
-            all_distractors.append((ent, answer.similarity(ent)))
+
+        matching_ents = [ent for ent in self.spacy.ents if ent.ent_id == answer.ent_id]
+        print(matching_ents)
+
+        for ent in matching_ents:
+            all_distractors.append(ent)
         for chunk in self.spacy.noun_chunks:
-            all_distractors.append((ent, answer.similarity(chunk)))
+            all_distractors.append(chunk)
 
         # make a Matcher for POS tags of answer
         pos_tags = [w.tag_ for w in answer]
-        matcher = spacy.matcher.Matcher(nlp.vocab)
+        matcher = spacy.matcher.Matcher(self.nlp.vocab)
         matcher.add_pattern("answer_pattern", [{spacy.attrs.TAG: tag} for tag in pos_tags])
         matches = matcher(self.spacy)
-        for match in matches:
+        for m in matches:
             phrase = self.spacy[m[2]:m[3]]
-            all_distractors.append(phrase, answer.similarity(phrase))
+            all_distractors.append(phrase)
 
-        return sorted(set(all_distractors, key = lambda x: x[1]))[:3]
+        #code something here which removes items that are entirely contined in the answer
+        non_overlapping_distractors = [d for d in all_distractors if d.text not in answer.text]
+        distractors = [(d.text, answer.similarity(d)) for d in non_overlapping_distractors]
+
+        #keep duplicate with highest similarity and discard the rest
+        sorted_distractors = sorted(distractors, key=lambda x: x[1], reverse=True)
+
+        top_distractors = []
+        for sd in sorted_distractors:
+            if sd[0] not in [td[0] for td in top_distractors]:
+                top_distractors.append(sd)
+
+        return top_distractors[:3]
 
 
 class SemanticSentence(object):
-    def __init__(self, sentence, question, answer):
+    def __init__(self, sentence, question, answer, nlp):
+        self.nlp = nlp
         self.raw_sentence = sentence
         self.raw_question = question
         self.raw_answer = answer
         self.ascii_sentence = unicodedata.normalize('NFKD', sentence).encode('ascii','ignore')
         self.ascii_question = unicodedata.normalize('NFKD', question).encode('ascii','ignore')
         self.ascii_answer = unicodedata.normalize('NFKD', answer).encode('ascii','ignore')
-        self.spacy_sent = nlp(self.raw_sentence)
-        self.spacy_ques = nlp(self.raw_question)
+        self.spacy_sent = self.nlp(self.raw_sentence)
+        self.spacy_ques = self.nlp(self.raw_question)
         self.answer_length = self.set_answer_length()
         self.spacy_answer = self.set_spacy_answer()
         self.annotator=Annotator()
@@ -128,16 +146,17 @@ class SemanticSentence(object):
         return np.array(vector)
 
 class Blanker(object):
-    def __init__(self, raw_text):
-        self.spacy = nlp(raw_text)
+    def __init__(self, raw_text, nlp):
+        self.nlp = nlp
+        self.spacy = self.nlp(raw_text)
         self.blanks = self.make_blanks()
-    
+        
     def make_blanks(self):
         #good_tags = [u'NNP', u'NN', u'DT NN', u'NNS', u'CD', u'DT JJ NN', u'JJ NNS', u'NNP NNP', u'DT NN NN', u'DT NNP NNP', u'JJ NN', u'DT NNP', u'NN NN', u'NN NNS', u'JJ', u'CD NNS', u'DT NNS', u'VBD', u'DT NNPS', u'NNP POS', u'VB', u'JJ NNP', u'DT NNP NNP NNP', u'DT JJ NNS', u'DT NNP NN', u'CD NNP', u'NNP NNP NNP', u'DT JJ JJ NN', u'VBG', u'NNP CC NNP', u'NNP NN', u'DT NNP IN NNP', u'JJ NN NNS', u'DT JJ NN NN', u'NNP CD , CD', u'NNP CD', u'DT NNP NNP NNP NNP', u'NNP NNS', u'FW', u'PRP$ NNS']
         good_tags = [u'CD', u'JJ', u'VB', u'VBG', u'FW']
 
         #iterate thru some list of patterns
-        matcher = spacy.matcher.Matcher(nlp.vocab)
+        matcher = spacy.matcher.Matcher(self.nlp.vocab)
 
         for i, pattern in enumerate(good_tags):
             matcher.add_pattern("i", [{spacy.attrs.TAG: tag} for tag in pattern.split()])

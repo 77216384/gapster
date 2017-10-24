@@ -12,7 +12,7 @@ from sumy.utils import get_stop_words
 
 import unicodedata
 #import gensim.models.word2vec as w2v
-import multiprocessing
+#import multiprocessing
 
 #from nltk.tag import StanfordPOSTagger, StanfordNERTagger
 #from nltk.wsd import lesk
@@ -183,11 +183,11 @@ def get_top_patterns(num=25):
      '24: {<DT><NNP><NNP><NNP>}', '25: {<NNP><NNP><NNP>}']
     return patterns[1:num]
 
-def predict_best_question(questions, model, top_n=1):
+def predict_best_question(questions, model, nlp, top_n=1):
     max_pred = 0
     predictions = []
     for i, q in enumerate(questions):
-        question_vector = SemanticSentence(q['sentence'], q['question'], q['answer']).vector()
+        question_vector = SemanticSentence(q['sentence'], q['question'], q['answer'], nlp).vector()
         pred = model.predict_proba(question_vector.reshape(1, -1))[0][1]
         predictions.append((q, pred))
         top_questions = sorted(predictions, key=lambda x: x[1], reverse=True)[:top_n]
