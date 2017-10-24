@@ -16,7 +16,7 @@ with open('lr_opt2.pickle', 'rb') as f:
 
 @app.route("/")
 def index():
-    return render_template('index.html')
+    return render_template('index2.html')
 
 @app.route("/question", methods=['POST'])
 def make_question():
