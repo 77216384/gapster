@@ -40,17 +40,34 @@ class DistractorSet(object):
 
         #code something here which removes items that are entirely contined in the answer
         non_overlapping_distractors = [d for d in all_distractors if d.text not in answer.text]
-        distractors = [(d.text, answer.similarity(d)) for d in non_overlapping_distractors]
+
+        distractors = [(d, answer.similarity(d)) for d in non_overlapping_distractors]
 
         #keep duplicate with highest similarity and discard the rest
         sorted_distractors = sorted(distractors, key=lambda x: x[1], reverse=True)
+        
+        sorted_distractors = sorted_distractors[:15]
 
-        top_distractors = []
+        non_dup_distractors = []
         for sd in sorted_distractors:
-            if sd[0] not in [td[0] for td in top_distractors]:
-                top_distractors.append(sd)
+            if sd[0].text not in [td[0].text for td in non_dup_distractors]:
+                non_dup_distractors.append(sd)
 
-        return top_distractors[:3]
+        non_subset_distractors = []
+        for i, td in enumerate(non_dup_distractors):
+            if i == 0:
+                non_subset_distractors.append(td)
+            elif td[0].text not in " ".join([x[0].text for x in non_subset_distractors]):
+                non_subset_distractors.append(td)
+
+        root_unique_distractors = []
+        for i, td in enumerate(non_subset_distractors):
+            if i == 0:
+                root_unique_distractors.append(td)
+            elif not td[0].root.text in [x[0].root.text for x in root_unique_distractors]:
+                root_unique_distractors.append(td)
+
+        return [(rud[0].text, rud[1]) for rud in root_unique_distractors[:4]]
 
 
 class SemanticSentence(object):

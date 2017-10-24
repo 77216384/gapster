@@ -12,7 +12,7 @@ app = Flask(__name__)
 with open('lr_opt2.pickle', 'rb') as f:
     lr = pickle.load(f)
 
-#nlp = spacy.load('en_core_web_md')
+nlp = spacy.load('en_core_web_md')
 
 @app.route("/")
 def index():

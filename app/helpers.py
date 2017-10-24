@@ -191,8 +191,15 @@ def predict_best_question(questions, model, nlp, top_n=1):
         question_vector = SemanticSentence(q['sentence'], q['question'], q['answer'], nlp, srl=q['srl']).vector()
         pred = model.predict_proba(question_vector.reshape(1, -1))[0][1]
         predictions.append((q, pred))
-        top_questions = sorted(predictions, key=lambda x: x[1], reverse=True)[:top_n]
-    return top_questions
+    top_questions = sorted(predictions, key=lambda x: x[1], reverse=True)
+    
+    #remove duplicate sentences
+    non_dup_top_questions = []
+    for tq in top_questions:
+        if tq[0]['sentence'] not in [q[0]['sentence'] for q in non_dup_top_questions]:
+            non_dup_top_questions.append(tq)
+
+    return non_dup_top_questions[:top_n]
 
 def get_best_sentences(text, num=1):
     sentence_count = num
