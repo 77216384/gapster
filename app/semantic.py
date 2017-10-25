@@ -14,44 +14,52 @@ import re
 #nlp = spacy.load('en_core_web_md')
 
 class DistractorSet(object):
-    def __init__(self, text, answer, nlp):
+    def __init__(self, text, sentence, answer, nlp):
         self.nlp = nlp
-        self.answer = answer
+        self.spacy_answer = answer
+        self.spacy_sentence = sentence
         self.raw_text = text
         self.spacy = self.nlp(text)
         self.distractors = []
         self.matching_ents = self.get_matching_ents()
         self.noun_chunks = list(self.spacy.noun_chunks)
         self.pos_pattern_matches = self.get_pos_pattern_matches()
+        self.distractors = self.make_distractors()
 
     def get_matching_ents(self):
-        return [ent for ent in self.spacy.ents if ent.ent_id == self.answer.ent_id]
+        return [ent for ent in self.spacy.ents if ent.ent_id == self.spacy_answer.ent_id]
 
     def get_pos_pattern_matches(self):
-        pos_tag_pattern = [w.tag_ for w in self.answer]
+        pos_tag_pattern = [w.tag_ for w in self.spacy_answer]
         matcher = spacy.matcher.Matcher(self.nlp.vocab)
         matcher.add_pattern("answer_pattern", [{spacy.attrs.TAG: tag} for tag in pos_tag_pattern])
         matches = matcher(self.spacy)
         return [self.spacy[m[2]:m[3]] for m in matches]
 
-    def collect_distrctors(self):
+    def collect_distractors(self):
         return self.matching_ents + self.noun_chunks + self.pos_pattern_matches
 
-    def remove_answer_overlappers(self, distractors):
-        return [d for d in distractors if d.text not in answer.text]
+    def filter_duplicates(self, distractors):
+        non_duplicates = set()
+        for sd in distractors:
+            if sd.text not in {nd.text for nd in non_duplicates}:
+                non_duplicates.add(sd)
+        return non_duplicates
+
+    def remove_distractor_in_answer(self, distractors):
+        return [d for d in distractors if d.text not in self.spacy_answer.text]
+
+    def remove_answer_in_distractor(self, distractors):
+        return [d for d in distractors if self.spacy_answer.text not in d.text]
+
+    def remove_common_root_with_answer(self, distractors):
+        return [d for d in distractors if d.root.text != self.spacy_answer.root.text]
 
     def get_similarities_to_answer(self, distractors):
-        return [(d, answer.similarity(d)) for d in distractors]
+        return [(d, self.spacy_answer.similarity(d)) for d in distractors]
 
     def sort_distractors(self, distractors):
         return sorted(distractors, key=lambda x: x[1], reverse=True)
-
-    def filter_duplicates(self, sorted_distractors):
-        non_duplicates = set()
-        for sd in sorted_distractors:
-            if sd.text not in {nd[0].text for nd in non_duplicates}:
-                non_duplicates.add(sd)
-        return non_duplicates
 
     def filter_subsets(self, sorted_distractors):
         non_subsets = set()
@@ -67,66 +75,72 @@ class DistractorSet(object):
                 non_root_duplicates.add(sd)
         return non_root_duplicates
 
-    def make_distractors(self, answer):
-        #all_distractors = []
+    def filter_unmatching_roots(self, sorted_distractors):
+        matching_roots = set()
+        for sd in sorted_distractors:
+            if sd[0].root.tag_ == self.spacy_answer.root.tag_:
+                matching_roots.add(sd)
+        return matching_roots
 
-        #matching_ents = [ent for ent in self.spacy.ents if ent.ent_id == answer.ent_id]
+    def filter_non_temporal(self, sorted_distractors):
+        if self.spacy_answer[-1].text in ' days months years hours minutes seconds weeks ':
+            temporal = set()
+            for sd in sorted_distractors:
+                if sd[0][-1].text in ' days months years hours minutes seconds weeks ':
+                    temporal.add(sd)
+            return temporal
+        else:
+            return sorted_distractors
 
-        #for ent in matching_ents:
-            #all_distractors.append(ent)
-        #for chunk in self.spacy.noun_chunks:
-            #all_distractors.append(chunk)
+    def filter_insentence_ners(self, sorted_distractors):
+        not_in_sentence = set()
+        for sd in sorted_distractors:
+            if sd[0][0].ent_iob_ != 'O' and sd[0].text not in self.spacy_sentence.text:
+                not_in_sentence.add(sd)
+        return not_in_sentence
 
-        # make a Matcher for POS tags of answer
-        #pos_tags = [w.tag_ for w in answer]
-        #matcher = spacy.matcher.Matcher(self.nlp.vocab)
-        #matcher.add_pattern("answer_pattern", [{spacy.attrs.TAG: tag} for tag in pos_tags])
-        #matches = matcher(self.spacy)
-        #for m in matches:
-        #    phrase = self.spacy[m[2]:m[3]]
-        #    all_distractors.append(phrase)
+    def make_distractors(self):
 
-        #code something here which removes items that are entirely contined in the answer
-        #non_overlapping_distractors = [d for d in all_distractors if d.text not in answer.text]
-
-        #distractors = [(d, answer.similarity(d)) for d in non_overlapping_distractors]
-
-        #keep duplicate with highest similarity and discard the rest
-        #sorted_distractors = sorted(distractors, key=lambda x: x[1], reverse=True)
-        
-        #sorted_distractors = sorted_distractors[:15]
-
-        #non_dup_distractors = []
-        #for sd in sorted_distractors:
-        #    if sd[0].text not in [td[0].text for td in non_dup_distractors]:
-        #        non_dup_distractors.append(sd)
-
-        non_subset_distractors = []
-        #for i, td in enumerate(non_dup_distractors):
-        #    if i == 0:
-        #        non_subset_distractors.append(td)
-        #    elif td[0].text not in " ".join([x[0].text for x in non_subset_distractors]):
-        #        non_subset_distractors.append(td)
-
-        #root_unique_distractors = []
-        #for i, td in enumerate(non_subset_distractors):
-        #    if i == 0:
-        #        root_unique_distractors.append(td)
-        #    elif not td[0].root.text in [x[0].root.text for x in root_unique_distractors]:
-        #        root_unique_distractors.append(td)
-
-        #return [(rud[0].text, rud[1]) for rud in root_unique_distractors[:3]]
-
-        candidate_distractors = self.collect_distrctors()
-        distractors = self.remove_answer_overlappers(distractors)
+        candidate_distractors = self.collect_distractors()
+        distractors = self.filter_duplicates(candidate_distractors)
+        distractors = self.remove_distractor_in_answer(distractors)
+        distractors = self.remove_answer_in_distractor(distractors)
+        distractors = self.remove_common_root_with_answer(distractors)
         distractors = self.get_similarities_to_answer(distractors)
-        sorted_distractors = self.sorted_distractors(distractors)
-        sorted_distractors = sorted_distractors[:15]
-        sorted_distractors = self.filter_duplicates(sorted_distractors)
-        sorted_distractors = self.filter_subsets(sorted_distractors)
-        sorted_distractors = self.filter_root_duplicates(sorted_distractors)
+        sorted_distractors = self.sort_distractors(distractors)
+        
+        sorted_distractors = sorted_distractors[:50]
 
-        return [sd[0].text, sd[1] for sd in sorted_distractors]
+        sorted_distractors = self.filter_non_temporal(self.sort_distractors(sorted_distractors))
+        sorted_distractors = self.filter_subsets(self.sort_distractors(sorted_distractors))
+        sorted_distractors = self.filter_root_duplicates(self.sort_distractors(sorted_distractors))
+        sorted_distractors = self.filter_unmatching_roots(self.sort_distractors(sorted_distractors))
+        sorted_distractors = self.filter_insentence_ners(self.sort_distractors(sorted_distractors))
+
+        sorted_distractors = list(self.sort_distractors(sorted_distractors))
+        
+        output = []
+        if self.spacy_answer[0].tag_ == 'DT':
+
+            article = self.spacy_answer[0].text
+
+            for sd in sorted_distractors:
+                if sd[0][0].tag_ == 'DT' and sd[0][0].text != article:
+                    output.append((article+" "+sd[0][1:].text, sd[1]))
+                elif sd[0][0].tag_ != 'DT':
+                    output.append((article+" "+sd[0][0].text, sd[1]))
+                else:
+                    output.append((sd[0][0].text, sd[1]))
+
+        else:
+            
+            for sd in sorted_distractors:
+                if sd[0][0].tag_ == 'DT':
+                    output.append((sd[0].text, sd[1]))
+                else:
+                    output.append((sd[0].text, sd[1]))
+
+        return output[:3]
 
 
 class SemanticSentence(object):
@@ -269,6 +283,6 @@ class Blanker(object):
                     blanked_sentence += ('_'+token.whitespace_)
                 else:
                     blanked_sentence += (token.text+token.whitespace_)
-            all_blanks.append({'question': blanked_sentence, 'answer': answer, 'sentence': self.spacy.text, 'spacy_answer': spacy_answer, 'srl':self.srl})
+            all_blanks.append({'question': blanked_sentence, 'answer': answer, 'sentence': self.spacy.text, 'spacy_sentence': self.spacy, 'spacy_answer': spacy_answer, 'srl':self.srl})
 
         return all_blanks

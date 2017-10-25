@@ -38,7 +38,7 @@ def make_question():
 			questions += b.blanks
 		
 		best_questions = helpers.predict_best_question(questions, lr, nlp, top_n=5)
-		distractors = DistractorSet(text, nlp).make_distractors(best_questions[0][0]['spacy_answer'])
+		distractors = DistractorSet(text, best_questions[0][0]['spacy_sentence'], best_questions[0][0]['spacy_answer'], nlp).distractors
 		question = best_questions[0][0]['question']
 		answer = best_questions[0][0]['answer']
 		output = {'question': question, 'distractors': distractors, 'answer': answer}
