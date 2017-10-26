@@ -11,7 +11,8 @@ import spacy
 import nltk
 import re
 
-#nlp = spacy.load('en_core_web_md')
+# code a way to send all 5 questions to to the DistractorSet and if a question returns less than 3
+# distractors, iterate to the next one OR keep coding edge cases like 25% higher
 
 class DistractorSet(object):
     def __init__(self, text, sentence, answer, nlp):
@@ -24,10 +25,20 @@ class DistractorSet(object):
         self.matching_ents = self.get_matching_ents()
         self.noun_chunks = list(self.spacy.noun_chunks)
         self.pos_pattern_matches = self.get_pos_pattern_matches()
+        self.root_pos_matches = self.get_root_pos_matches()
         self.distractors = self.make_distractors()
 
     def get_matching_ents(self):
         return [ent for ent in self.spacy.ents if ent.ent_id == self.spacy_answer.ent_id]
+
+    def get_root_pos_matches(self):
+        if self.spacy_answer.root.pos_ != 'NOUN':
+            matcher = spacy.matcher.Matcher(self.nlp.vocab)
+            matcher.add_pattern("root_pos", [{spacy.attrs.TAG: self.spacy_answer.root.tag_}])
+            matches = matcher(self.spacy)
+            return [self.spacy[m[2]:m[3]] for m in matches]
+        else:
+            return []
 
     def get_pos_pattern_matches(self):
         pos_tag_pattern = [w.tag_ for w in self.spacy_answer]
@@ -37,7 +48,7 @@ class DistractorSet(object):
         return [self.spacy[m[2]:m[3]] for m in matches]
 
     def collect_distractors(self):
-        return self.matching_ents + self.noun_chunks + self.pos_pattern_matches
+        return self.matching_ents + self.noun_chunks + self.pos_pattern_matches + self.root_pos_matches
 
     def filter_duplicates(self, distractors):
         non_duplicates = set()
@@ -95,17 +106,49 @@ class DistractorSet(object):
     def filter_insentence_ners(self, sorted_distractors):
         not_in_sentence = set()
         for sd in sorted_distractors:
-            if sd[0][0].ent_iob_ != 'O' and sd[0].text not in self.spacy_sentence.text:
+            #if sd[0][0].ent_type_ != '' and sd[0].text not in self.spacy_sentence.text:
+             #   not_in_sentence.add(sd)
+            #elif sd[0][0].ent_type_ == '':
+            #    not_in_sentence.add(sd)
+            if sd[0].text not in self.spacy_sentence.text:
                 not_in_sentence.add(sd)
         return not_in_sentence
+
+    def ner_bubble_up(self, sorted_distractors):
+        if self.spacy_answer[0].ent_type_ != '':
+            print("ANSWER NER:", self.spacy_answer[0].ent_type_)
+            print("ANSWER ROOT POS:", self.spacy_answer.root.tag_)
+            bubbled_ner = []
+            answer_ent_type = self.spacy_answer[0].ent_type_
+            last_ent_index = 0
+
+            for i, sd in enumerate(sorted_distractors):
+
+                if sd[0][0].ent_type_ == answer_ent_type:
+
+                    if last_ent_index < i or last_ent_index == 0:
+                        bubbled_ner.insert(last_ent_index+1, sd)
+                        last_ent_index += 1
+                    else:
+                        bubbled_ner.append(sd)
+
+                else:
+                    bubbled_ner.append(sd)
+
+            return bubbled_ner
+        else:
+            return sorted_distractors
+
+    def add_lch_similarity(self, sorted_distractors):
+        pass
 
     def make_distractors(self):
 
         candidate_distractors = self.collect_distractors()
         distractors = self.filter_duplicates(candidate_distractors)
+        distractors = self.remove_common_root_with_answer(distractors)
         distractors = self.remove_distractor_in_answer(distractors)
         distractors = self.remove_answer_in_distractor(distractors)
-        distractors = self.remove_common_root_with_answer(distractors)
         distractors = self.get_similarities_to_answer(distractors)
         sorted_distractors = self.sort_distractors(distractors)
         
@@ -113,11 +156,21 @@ class DistractorSet(object):
 
         sorted_distractors = self.filter_non_temporal(self.sort_distractors(sorted_distractors))
         sorted_distractors = self.filter_subsets(self.sort_distractors(sorted_distractors))
+        print("Subsets Filter")
+        print("sorted: ", self.sort_distractors(sorted_distractors))
         sorted_distractors = self.filter_root_duplicates(self.sort_distractors(sorted_distractors))
+        print("Root Duplcate Filter")
+        print("sorted: ", self.sort_distractors(sorted_distractors))
         sorted_distractors = self.filter_unmatching_roots(self.sort_distractors(sorted_distractors))
+        print("Unmatching Root Filter")
+        print("sorted: ", self.sort_distractors(sorted_distractors))
         sorted_distractors = self.filter_insentence_ners(self.sort_distractors(sorted_distractors))
+        print("Insentence NER Filter")
+        print("sorted: ", self.sort_distractors(sorted_distractors))
 
-        sorted_distractors = list(self.sort_distractors(sorted_distractors))
+        #sorted_distractors = list(self.sort_distractors(sorted_distractors))
+        #this last filter returns a list which should be sorted...
+        sorted_distractors = self.ner_bubble_up(self.sort_distractors(sorted_distractors))
         
         output = []
         if self.spacy_answer[0].tag_ == 'DT':
@@ -126,19 +179,15 @@ class DistractorSet(object):
 
             for sd in sorted_distractors:
                 if sd[0][0].tag_ == 'DT' and sd[0][0].text != article:
-                    output.append((article+" "+sd[0][1:].text, sd[1]))
+                    output.append((article+" "+sd[0][1:].text.lower(), sd[1]))
                 elif sd[0][0].tag_ != 'DT':
-                    output.append((article+" "+sd[0][0].text, sd[1]))
+                    output.append((article+" "+sd[0][0].text.lower(), sd[1]))
                 else:
-                    output.append((sd[0][0].text, sd[1]))
+                    output.append((sd[0][0].text.lower(), sd[1]))
 
         else:
-            
             for sd in sorted_distractors:
-                if sd[0][0].tag_ == 'DT':
-                    output.append((sd[0].text, sd[1]))
-                else:
-                    output.append((sd[0].text, sd[1]))
+                output.append((sd[0].text.lower(), sd[1]))
 
         return output[:3]
 
@@ -159,19 +208,13 @@ class SemanticSentence(object):
         self.raw_sentence = sentence
         self.raw_question = question
         self.raw_answer = answer
-        #self.ascii_sentence = unicodedata.normalize('NFKD', sentence).encode('ascii','ignore')
-        #self.ascii_question = unicodedata.normalize('NFKD', question).encode('ascii','ignore')
-        #self.ascii_answer = unicodedata.normalize('NFKD', answer).encode('ascii','ignore')
         self.spacy_sent = self.nlp(self.raw_sentence)
         self.spacy_ques = self.nlp(self.raw_question)
         self.answer_length = self.set_answer_length()
         self.spacy_answer = self.set_spacy_answer()
-        #self.annotator=Annotator()
-        #self.srl = self.annotator.getAnnotations(self.ascii_sentence)['srl']
         self.answer_pos = self.set_answer_pos()
         self.answer_ner = self.set_answer_ner()
         self.answer_ner_iob  = self.set_answer_ner_iob()
-        #self.answer_srl_label = self.set_answer_srl_label()
         self.answer_depth = self.set_answer_depth()
         self.answer_word_count = self.set_answer_word_count()
         self.all_pos_tags = ['CC', 'CD', 'DT', 'EX', 'FW', 'IN', 'JJ', 'JJR', 'JJS', 'LS', 'MD', 'NN', 'NNS', 'NNP', 'NNPS', 'PDT', 'POS', 'PRP', 'PRP$', 'RB', 'RBR', 'RBS', 'RP', 'SYM', 'TO', 'UH', 'VB', 'VBD', 'VBG', 'VBN', 'VBP', 'VBZ', 'WDT', 'WP', 'WP$', 'WRB', 'PUNCT']

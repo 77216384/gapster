@@ -41,7 +41,8 @@ def make_question():
 		distractors = DistractorSet(text, best_questions[0][0]['spacy_sentence'], best_questions[0][0]['spacy_answer'], nlp).distractors
 		question = best_questions[0][0]['question']
 		answer = best_questions[0][0]['answer']
-		output = {'question': question, 'distractors': distractors, 'answer': answer}
+		output = {'question': question, 'distractors': distractors, 'answer': answer.lower()}
+		#print(best_questions[0][0]['spacy_answer'][0].ent_type_)
 		return jsonify(output)
 
 
