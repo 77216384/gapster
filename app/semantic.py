@@ -7,6 +7,7 @@ import pandas as pd
 import numpy as np
 import unicodedata
 import pickle
+import pywsd
 import spacy
 import nltk
 import re
@@ -139,8 +140,55 @@ class DistractorSet(object):
         else:
             return sorted_distractors
 
-    def add_lch_similarity(self, sorted_distractors):
-        pass
+    def get_synset(self, spacy_word, sent=None):
+        if not sent:
+            for sentence in self.spacy.sents:
+                if spacy_word[0].i in [w.i for w in sentence]:
+                    context_sent = sentence
+        else:
+            context_sent = sent
+
+        synset = pywsd.similarity.max_similarity(context_sent.text, spacy_word.root.text, pos='n')
+
+        if not synset:
+            synsets = nltk.corpus.wordnet.synsets(self.spacy_answer.root.text)
+            if len(synsets) > 0:
+                synset = synsets[0]
+            else:
+                return None
+        return synset
+
+    def add_similarity_score(self, sorted_distractors):
+        if self.spacy_answer.root.pos_ == 'NOUN' and self.spacy_answer[0].ent_type_ == '' and self.spacy_answer.root.tag_ not in 'NNPS':
+            sorted_distractors = list(sorted_distractors)
+            answer_synset = self.get_synset(self.spacy_answer, sent=self.spacy_sentence)
+            scores = []
+            if not answer_synset:
+                return sorted_distractors
+            else:
+                for sd in sorted_distractors:
+                    distractor_synset = self.get_synset(sd[0])
+                    if not distractor_synset:
+                        score.append(0)
+                    else:
+                        scores.append(answer_synset.lch_similarity(distractor_synset))
+
+            scores = np.array(scores)
+            scores = scores/scores.max()
+
+            for i, sd in enumerate(sorted_distractors):
+                print(sd[0], scores[i])
+
+            plus_sim = []
+            for i, sd in enumerate(sorted_distractors):
+                plus_sim.append((sd[0], sd[1]+scores[i]))
+
+            return plus_sim
+
+        else:
+            return sorted_distractors
+
+
 
     def make_distractors(self):
 
@@ -167,6 +215,7 @@ class DistractorSet(object):
         sorted_distractors = self.filter_insentence_ners(self.sort_distractors(sorted_distractors))
         print("Insentence NER Filter")
         print("sorted: ", self.sort_distractors(sorted_distractors))
+        sorted_distractors = self.add_similarity_score(self.sort_distractors(sorted_distractors))
 
         #sorted_distractors = list(self.sort_distractors(sorted_distractors))
         #this last filter returns a list which should be sorted...
@@ -181,9 +230,9 @@ class DistractorSet(object):
                 if sd[0][0].tag_ == 'DT' and sd[0][0].text != article:
                     output.append((article+" "+sd[0][1:].text.lower(), sd[1]))
                 elif sd[0][0].tag_ != 'DT':
-                    output.append((article+" "+sd[0][0].text.lower(), sd[1]))
+                    output.append((article+" "+sd[0].text.lower(), sd[1]))
                 else:
-                    output.append((sd[0][0].text.lower(), sd[1]))
+                    output.append((sd[0].text.lower(), sd[1]))
 
         else:
             for sd in sorted_distractors:
