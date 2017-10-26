@@ -23,6 +23,7 @@ def make_question():
 	if request.is_json:
 		data = request.get_json() # data will be a python dict
 		text = data['text']
+		spacy_text = nlp(text)
 		sentences = helpers.get_best_sentences(text, num=5)
 		# add some code here to get srl labels so we don't have to do it each time
 		
@@ -37,12 +38,19 @@ def make_question():
 			b = Blanker(sentence, nlp)
 			questions += b.blanks
 		
-		best_questions = helpers.predict_best_question(questions, lr, nlp, top_n=5)
-		distractors = DistractorSet(text, best_questions[0][0]['spacy_sentence'], best_questions[0][0]['spacy_answer'], nlp).distractors
-		question = best_questions[0][0]['question']
-		answer = best_questions[0][0]['answer']
-		output = {'question': question, 'distractors': distractors, 'answer': answer.lower()}
-		#print(best_questions[0][0]['spacy_answer'][0].ent_type_)
+		predicted_best_questions = helpers.predict_best_question(questions, lr, nlp, top_n=5)
+		best_questions = []
+
+		for question in predict_best_question:
+			question = helpers.check_question_quality(question, spacy_text)
+			if question['quality']:
+				best_questions.append(question)
+
+		question = best_questions[0]['question']
+		answer = best_questions[0]['answer']
+		distractors = DistractorSet(best_questions[0], text, spacy_text).make_distractors()
+		output = {'question': question, 'answer': answer.lower(), 'distractors': distractors}
+
 		return jsonify(output)
 
 

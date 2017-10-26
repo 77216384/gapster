@@ -15,22 +15,24 @@ import re
 # code a way to send all 5 questions to to the DistractorSet and if a question returns less than 3
 # distractors, iterate to the next one OR keep coding edge cases like 25% higher
 
+# add ability to pass multiple questions/sentences/answers to class
 class DistractorSet(object):
-    def __init__(self, text, sentence, answer, nlp):
-        self.nlp = nlp
-        self.spacy_answer = answer
-        self.spacy_sentence = sentence
+    def __init__(self, question, text, spacy_text):
+        self.question = question
         self.raw_text = text
-        self.spacy = self.nlp(text)
+        self.spacy = spacy_text
+        self.spacy_answer = self.question['spacy_answer']
+        self.spacy_sentence = self.question['spacy_sentence']
+        self.matching_ents = self.question['matching_ents']
+        self.candidate_distractors = self.collect_distractors()
         self.distractors = []
-        self.matching_ents = self.get_matching_ents()
+        self.distractors = self.make_distractors()
+
+    def collect_distractors(self):
         self.noun_chunks = list(self.spacy.noun_chunks)
         self.pos_pattern_matches = self.get_pos_pattern_matches()
         self.root_pos_matches = self.get_root_pos_matches()
-        self.distractors = self.make_distractors()
-
-    def get_matching_ents(self):
-        return [ent for ent in self.spacy.ents if ent.ent_id == self.spacy_answer.ent_id]
+        return self.matching_ents + self.noun_chunks + self.pos_pattern_matches + self.root_pos_matches
 
     def get_root_pos_matches(self):
         if self.spacy_answer.root.pos_ != 'NOUN':
@@ -47,9 +49,6 @@ class DistractorSet(object):
         matcher.add_pattern("answer_pattern", [{spacy.attrs.TAG: tag} for tag in pos_tag_pattern])
         matches = matcher(self.spacy)
         return [self.spacy[m[2]:m[3]] for m in matches]
-
-    def collect_distractors(self):
-        return self.matching_ents + self.noun_chunks + self.pos_pattern_matches + self.root_pos_matches
 
     def filter_duplicates(self, distractors):
         non_duplicates = set()
@@ -188,36 +187,35 @@ class DistractorSet(object):
         else:
             return sorted_distractors
 
-
-
-    def make_distractors(self):
-
-        candidate_distractors = self.collect_distractors()
-        distractors = self.filter_duplicates(candidate_distractors)
+    def self.initail_filter(self, distractors):
+        distractors = self.filter_duplicates(distractors)
         distractors = self.remove_common_root_with_answer(distractors)
         distractors = self.remove_distractor_in_answer(distractors)
         distractors = self.remove_answer_in_distractor(distractors)
-        distractors = self.get_similarities_to_answer(distractors)
+        return distractors
+
+    def make_distractors(self):
+        non_dup_overlaps = self.initail_filter(self.candidate_distractors)
+        distractors = self.get_similarities_to_answer(non_dup_overlaps)
         sorted_distractors = self.sort_distractors(distractors)
         
         sorted_distractors = sorted_distractors[:50]
 
         sorted_distractors = self.filter_non_temporal(self.sort_distractors(sorted_distractors))
         sorted_distractors = self.filter_subsets(self.sort_distractors(sorted_distractors))
-        print("Subsets Filter")
-        print("sorted: ", self.sort_distractors(sorted_distractors))
+        #print("Subsets Filter")
+        #print("sorted: ", self.sort_distractors(sorted_distractors))
         sorted_distractors = self.filter_root_duplicates(self.sort_distractors(sorted_distractors))
-        print("Root Duplcate Filter")
-        print("sorted: ", self.sort_distractors(sorted_distractors))
+        #print("Root Duplcate Filter")
+        #print("sorted: ", self.sort_distractors(sorted_distractors))
         sorted_distractors = self.filter_unmatching_roots(self.sort_distractors(sorted_distractors))
-        print("Unmatching Root Filter")
-        print("sorted: ", self.sort_distractors(sorted_distractors))
+        #print("Unmatching Root Filter")
+        #print("sorted: ", self.sort_distractors(sorted_distractors))
         sorted_distractors = self.filter_insentence_ners(self.sort_distractors(sorted_distractors))
-        print("Insentence NER Filter")
-        print("sorted: ", self.sort_distractors(sorted_distractors))
+        #print("Insentence NER Filter")
+        #print("sorted: ", self.sort_distractors(sorted_distractors))
         sorted_distractors = self.add_similarity_score(self.sort_distractors(sorted_distractors))
 
-        #sorted_distractors = list(self.sort_distractors(sorted_distractors))
         #this last filter returns a list which should be sorted...
         sorted_distractors = self.ner_bubble_up(self.sort_distractors(sorted_distractors))
         
