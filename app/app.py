@@ -25,7 +25,6 @@ def make_question():
 		text = data['text']
 		spacy_text = nlp(text)
 		sentences = helpers.get_best_sentences(text, num=5)
-		# add some code here to get srl labels so we don't have to do it each time
 		
 		sentences_with_srl = []
 		for s in sentences:
@@ -41,14 +40,14 @@ def make_question():
 		predicted_best_questions = helpers.predict_best_question(questions, lr, nlp, top_n=5)
 		best_questions = []
 
-		for question in predict_best_question:
+		for question in predicted_best_questions:
 			question = helpers.check_question_quality(question, spacy_text)
 			if question['quality']:
 				best_questions.append(question)
 
 		question = best_questions[0]['question']
 		answer = best_questions[0]['answer']
-		distractors = DistractorSet(best_questions[0], text, spacy_text).make_distractors()
+		distractors = DistractorSet(best_questions[0], text, spacy_text, nlp).distractors
 		output = {'question': question, 'answer': answer.lower(), 'distractors': distractors}
 
 		return jsonify(output)

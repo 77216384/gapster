@@ -31,8 +31,8 @@ def get_matching_ents(spacy_answer, spacy_text):
 
 def check_question_quality(question, spacy_text):
     if question['spacy_answer'][0].ent_type_ != '':
-        matching_ents = get_matching_ents(spacy_answer, spacy_text)
-        if len(matching_ents) >= 3:
+        matching_ents = get_matching_ents(question['spacy_answer'], spacy_text)
+        if len(matching_ents) >= 4:
             question.update({'quality':True})
             question.update({'matching_ents': matching_ents})
         else:
@@ -41,7 +41,6 @@ def check_question_quality(question, spacy_text):
     else:
         question.update({'quality':True})
         question.update({'matching_ents': []})
-
     return question
 
 
@@ -59,7 +58,6 @@ def predict_best_question(questions, model, nlp, top_n=1):
     for tq in top_questions:
         if tq[0]['sentence'] not in [q[0]['sentence'] for q in non_dup_top_questions]:
             non_dup_top_questions.append(tq)
-
     return [q[0] for q in non_dup_top_questions[:top_n]]
 
 def get_best_sentences(text, num=1):
@@ -68,8 +66,12 @@ def get_best_sentences(text, num=1):
     stemmer = Stemmer('english')
     summarizer = Summarizer(stemmer)
     summarizer.stop_words = get_stop_words('english')
-    
     return [unicode(s) for s in summarizer(parser.document, sentence_count)]
 
 def unpunkt(text):
     return "".join([c if unicodedata.category(c)[0] != 'P' else ' ' for c in text])
+
+def get_srl(sentence):
+    ascii_sentence = unicodedata.normalize('NFKD', sentence).encode('ascii','ignore')
+    annotator=Annotator()
+    return annotator.getAnnotations(ascii_sentence)['srl']

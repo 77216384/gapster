@@ -17,7 +17,8 @@ import re
 
 # add ability to pass multiple questions/sentences/answers to class
 class DistractorSet(object):
-    def __init__(self, question, text, spacy_text):
+    def __init__(self, question, text, spacy_text, nlp):
+        self.nlp = nlp
         self.question = question
         self.raw_text = text
         self.spacy = spacy_text
@@ -187,7 +188,7 @@ class DistractorSet(object):
         else:
             return sorted_distractors
 
-    def self.initail_filter(self, distractors):
+    def initial_filter(self, distractors):
         distractors = self.filter_duplicates(distractors)
         distractors = self.remove_common_root_with_answer(distractors)
         distractors = self.remove_distractor_in_answer(distractors)
@@ -195,7 +196,7 @@ class DistractorSet(object):
         return distractors
 
     def make_distractors(self):
-        non_dup_overlaps = self.initail_filter(self.candidate_distractors)
+        non_dup_overlaps = self.initial_filter(self.candidate_distractors)
         distractors = self.get_similarities_to_answer(non_dup_overlaps)
         sorted_distractors = self.sort_distractors(distractors)
         
