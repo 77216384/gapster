@@ -4,7 +4,11 @@ import helpers
 import pickle
 import json
 import spacy
-from flask import Flask, render_template, request, redirect, jsonify
+import requests
+from bs4 import BeautifulSoup as bs
+import json
+import re
+from flask import Flask, render_template, request, redirect, jsonify, url_for
 
 
 app = Flask(__name__)
@@ -17,6 +21,15 @@ nlp = spacy.load('en_core_web_md')
 @app.route("/")
 def index():
     return render_template('index.html')
+
+@app.route("/fetch_article/napoleon")
+def get_demo_article():
+	url = 'https://en.wikipedia.org/wiki/Napoleonic_Wars'
+	res = requests.get(url)
+	html = bs(res.content, 'lxml')
+	article = " ".join([p.text for p in html.select('#mw-content-text p')])
+	data = json={'text': re.sub('\[\d+\]', '', article)}
+	return jsonify(data)
 
 @app.route("/question", methods=['POST'])
 def make_question():
@@ -48,9 +61,11 @@ def make_question():
 		question = best_questions[0]['question']
 		answer = best_questions[0]['answer']
 		distractors = DistractorSet(best_questions[0], text, spacy_text, nlp).distractors
-		output = {'question': question, 'answer': answer.lower(), 'distractors': distractors}
+		output = {'question': question, 'answer': answer.capitalize(), 'distractors': distractors}
 
 		return jsonify(output)
+	else:
+		return "not json"
 
 
 if __name__ == '__main__':

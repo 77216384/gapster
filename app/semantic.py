@@ -107,10 +107,6 @@ class DistractorSet(object):
     def filter_insentence_ners(self, sorted_distractors):
         not_in_sentence = set()
         for sd in sorted_distractors:
-            #if sd[0][0].ent_type_ != '' and sd[0].text not in self.spacy_sentence.text:
-             #   not_in_sentence.add(sd)
-            #elif sd[0][0].ent_type_ == '':
-            #    not_in_sentence.add(sd)
             if sd[0].text not in self.spacy_sentence.text:
                 not_in_sentence.add(sd)
         return not_in_sentence
@@ -126,10 +122,15 @@ class DistractorSet(object):
             for i, sd in enumerate(sorted_distractors):
 
                 if sd[0][0].ent_type_ == answer_ent_type:
+                    print(sd[0], sd[0][0].ent_type_)
 
                     if last_ent_index < i or last_ent_index == 0:
-                        bubbled_ner.insert(last_ent_index+1, sd)
-                        last_ent_index += 1
+                        if last_ent_index == 0:
+                            bubbled_ner.insert(last_ent_index, sd)
+                            last_ent_index += 1
+                        else:
+                            bubbled_ner.insert(last_ent_index, sd)
+                            last_ent_index += 1
                     else:
                         bubbled_ner.append(sd)
 
@@ -220,6 +221,9 @@ class DistractorSet(object):
         #this last filter returns a list which should be sorted...
         sorted_distractors = self.ner_bubble_up(self.sort_distractors(sorted_distractors))
         
+        for sd in sorted_distractors[:3]:
+            print(sd[0][0].ent_type_)
+
         output = []
         if self.spacy_answer[0].tag_ == 'DT':
 
@@ -235,7 +239,10 @@ class DistractorSet(object):
 
         else:
             for sd in sorted_distractors:
-                output.append((sd[0].text.lower(), sd[1]))
+                output.append(sd[0].text.capitalize())
+
+        for o in output[:3]:
+            print(o)
 
         return output[:3]
 
