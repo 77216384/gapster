@@ -16,7 +16,7 @@ nlp = spacy.load('en_core_web_md')
 
 @app.route("/")
 def index():
-    return render_template('index2.html')
+    return render_template('index.html')
 
 @app.route("/question", methods=['POST'])
 def make_question():

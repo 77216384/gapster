@@ -1,47 +1,268 @@
-<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/css/bootstrap.min.css" integrity="sha384-rwoIResjU2yc3z8GV/NPeZWAv56rSmLldC3R/AZzGRnGxQQKnKkoFVhFQhNUwEyJ" crossorigin="anonymous">
-<link rel="stylesheet" href="/static/style.css">
-<img class="mainLogo" src="/static/gapster.png">
+<!DOCTYPE html>
+<html lang="en">
 
-<textarea id="demoText">John Fitzgerald Jack Kennedy (May 29, 1917 – November 22, 1963), commonly referred to by his initials JFK, was an American statesman who served as the 35th President of the United States from January 1961 until his assassination in November 1963. Kennedy served at the height of the Cold War, and much of his presidency focused on managing relations with the Soviet Union. He was a member of the Democratic Party who represented Massachusetts in the United States House of Representatives and the United States Senate prior to becoming president. Kennedy was born in Brookline, Massachusetts, to Joseph P. Kennedy, Sr. and Rose Kennedy. A scion of the Kennedy family, he graduated from Harvard University in 1940 before joining the United States Naval Reserve the following year. During World War II, Kennedy commanded a series of PT boats in the Pacific theater and earned the Navy and Marine Corps Medal for his service. After the war, Kennedy represented Massachusetts's 11th congressional district in the United States House of Representatives from 1947 until 1953. He was subsequently elected to the U.S. Senate and served as the junior Senator from Massachusetts from 1953 until 1960. While serving in the Senate, he published Profiles in Courage, which won the Pulitzer Prize for Biography. In the 1960 presidential election, Kennedy narrowly defeated Republican opponent Richard Nixon, who was the incumbent Vice President. Kennedy's time in office was marked by high tensions with Communist states in the Cold War. He increased the number of American military advisers in South Vietnam by a factor of 18 over President Dwight D. Eisenhower. In April 1961, he authorized a failed joint-CIA attempt to overthrow the Cuban government of Fidel Castro in the Bay of Pigs Invasion. He subsequently rejected plans by the Joint Chiefs of Staff to orchestrate false-flag attacks on American soil in order to gain public approval for a war against Cuba. In October 1962, U.S. spy planes discovered that Soviet missile bases had been deployed in Cuba; the resulting period of tensions, termed the Cuban Missile Crisis, nearly resulted in the breakout of a global thermonuclear conflict. Domestically, Kennedy presided over the establishment of the Peace Corps and supported the Civil Rights Movement, but he was largely unsuccessful in passing his New Frontier domestic policies. Kennedy continues to rank highly in historians' polls of U.S. presidents and with the general public. His average approval rating of 70% is the highest of any president in Gallup's history of systematically measuring job approval. On November 22, 1963, Kennedy was assassinated in Dallas, Texas. Lee Harvey Oswald was arrested for the crime, but he was never prosecuted due to his murder by Jack Ruby two days later. Pursuant to the Presidential Succession Act, Vice President Lyndon B. Johnson was sworn in as president later that day. The FBI and the Warren Commission officially concluded that Oswald was the lone assassin, but various groups believed that Kennedy was the victim of a conspiracy. After Kennedy's death, many of his proposals were enacted, including the Civil Rights Act of 1964 and the Revenue Act of 1964.</textarea>
+  <head>
 
-<button id="textSubmit" type="button" class="btn btn-outline-primary">Submit</button>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
 
-<p/>
-<div id="question">
-	<h3>What Distractor _____ is the correct answer to this question.</h3>
-	<label class="custom-control custom-radio">
-	  <input id="radio1" name="radio" type="radio" class="custom-control-input">
-	  <span class="custom-control-indicator"></span>
-	  <span class="custom-control-description">Distractor 1</span>
-	</label>
-	<label class="custom-control custom-radio">
-	  <input id="radio2" name="radio" type="radio" class="custom-control-input">
-	  <span class="custom-control-indicator"></span>
-	  <span class="custom-control-description">Answer</span>
-	</label>
-	<label class="custom-control custom-radio">
-	  <input id="radio3" name="radio" type="radio" class="custom-control-input">
-	  <span class="custom-control-indicator"></span>
-	  <span class="custom-control-description">Distractor 2</span>
-	</label>
-	<label class="custom-control custom-radio">
-	  <input id="radio4" name="radio" type="radio" class="custom-control-input">
-	  <span class="custom-control-indicator"></span>
-	  <span class="custom-control-description">Distractor 3</span>
-	</label>
-	<label class="custom-control custom-radio">
-	  <input id="radio4" name="radio" type="radio" class="custom-control-input">
-	  <span class="custom-control-indicator"></span>
-	  <span class="custom-control-description">Distractor 4</span>
-	</label>
-	<br/>
-	<button id="answerSubmit" type="submit" class="btn btn-primary">Submit</button>
-</div>
+    <title>Creative - Start Bootstrap Theme</title>
 
+    <!-- Bootstrap core CSS -->
+    <link href={{ url_for('static', filename='vendor/bootstrap/css/bootstrap.min.css') }} rel="stylesheet" type="text/css">
 
+    <!-- Custom fonts for this template -->
+    <link href={{ url_for('static', filename='vendor/font-awesome/css/font-awesome.min.css') }} rel="stylesheet" type="text/css">
 
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+    <link href='https://fonts.googleapis.com/css?family=Merriweather:400,300,300italic,400italic,700,700italic,900,900italic' rel='stylesheet' type='text/css'>
 
-<script src="https://code.jquery.com/jquery-3.1.1.slim.min.js" integrity="sha384-A7FZj7v+d/sdmMqp/nOQwliLvUsJfDHW+k9Omg/a/EheAdgtzNs3hpfag6Ed950n" crossorigin="anonymous"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js" integrity="sha384-DztdAPBWPRXSA/3eYEEUWrWCy7G5KFbe8fFjk5JAIxUYHKkDx6Qin1DkWx51bBrb" crossorigin="anonymous"></script>
-<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/js/bootstrap.min.js" integrity="sha384-vBWWzlZJ8ea9aCX4pEW3rVHjgjt7zpkNpZk+02D9phzyeVkE+jo0ieGizqPLForn" crossorigin="anonymous"></script>
-<script src="/static/script.js"></script>
+    <!-- Plugin CSS -->
+    <link href="/static/vendor/magnific-popup/magnific-popup.css" rel="stylesheet">
+
+    <!-- Custom styles for this template -->
+    <link href="/static/css/creative.min.css" rel="stylesheet">
+
+  </head>
+
+  <body id="page-top">
+
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
+      <div class="container">
+        <a class="navbar-brand js-scroll-trigger" href="#page-top">Start Bootstrap</a>
+        <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarResponsive">
+          <ul class="navbar-nav ml-auto">
+            <li class="nav-item">
+              <a class="nav-link js-scroll-trigger" href="#about">About</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link js-scroll-trigger" href="#services">Services</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link js-scroll-trigger" href="#portfolio">Portfolio</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link js-scroll-trigger" href="#contact">Contact</a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+
+    <header class="masthead">
+      <div class="header-content">
+        <div class="header-content-inner">
+          <h1 id="homeHeading">Your Favorite Source of Free Bootstrap Themes</h1>
+          <hr>
+          <p>Start Bootstrap can help you build better websites using the Bootstrap CSS framework! Just download your template and start going, no strings attached!</p>
+          <a class="btn btn-primary btn-xl js-scroll-trigger" href="#about">Find Out More</a>
+        </div>
+      </div>
+    </header>
+
+    <section class="bg-primary" id="about">
+      <div class="container">
+        <div class="row">
+          <div class="col-lg-8 mx-auto text-center">
+            <h2 class="section-heading text-white">We've got what you need!</h2>
+            <hr class="light">
+            <p class="text-faded">Start Bootstrap has everything you need to get your new website up and running in no time! All of the templates and themes on Start Bootstrap are open source, free to download, and easy to use. No strings attached!</p>
+            <a class="btn btn-default btn-xl js-scroll-trigger" href="#services">Get Started!</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="services">
+      <div class="container">
+        <div class="row">
+          <div class="col-lg-12 text-center">
+            <h2 class="section-heading">At Your Service</h2>
+            <hr class="primary">
+          </div>
+        </div>
+      </div>
+      <div class="container">
+        <div class="row">
+          <div class="col-lg-3 col-md-6 text-center">
+            <div class="service-box">
+              <i class="fa fa-4x fa-diamond text-primary sr-icons"></i>
+              <h3>Sturdy Templates</h3>
+              <p class="text-muted">Our templates are updated regularly so they don't break.</p>
+            </div>
+          </div>
+          <div class="col-lg-3 col-md-6 text-center">
+            <div class="service-box">
+              <i class="fa fa-4x fa-paper-plane text-primary sr-icons"></i>
+              <h3>Ready to Ship</h3>
+              <p class="text-muted">You can use this theme as is, or you can make changes!</p>
+            </div>
+          </div>
+          <div class="col-lg-3 col-md-6 text-center">
+            <div class="service-box">
+              <i class="fa fa-4x fa-newspaper-o text-primary sr-icons"></i>
+              <h3>Up to Date</h3>
+              <p class="text-muted">We update dependencies to keep things fresh.</p>
+            </div>
+          </div>
+          <div class="col-lg-3 col-md-6 text-center">
+            <div class="service-box">
+              <i class="fa fa-4x fa-heart text-primary sr-icons"></i>
+              <h3>Made with Love</h3>
+              <p class="text-muted">You have to make your websites with love these days!</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="p-0" id="portfolio">
+      <div class="container-fluid">
+        <div class="row no-gutter popup-gallery">
+          <div class="col-lg-4 col-sm-6">
+            <a class="portfolio-box" href="/static/img/portfolio/fullsize/1.jpg">
+              <img class="img-fluid" src="/static/img/portfolio/thumbnails/1.jpg" alt="">
+              <div class="portfolio-box-caption">
+                <div class="portfolio-box-caption-content">
+                  <div class="project-category text-faded">
+                    Category
+                  </div>
+                  <div class="project-name">
+                    Project Name
+                  </div>
+                </div>
+              </div>
+            </a>
+          </div>
+          <div class="col-lg-4 col-sm-6">
+            <a class="portfolio-box" href="/static/img/portfolio/fullsize/2.jpg">
+              <img class="img-fluid" src="/static/img/portfolio/thumbnails/2.jpg" alt="">
+              <div class="portfolio-box-caption">
+                <div class="portfolio-box-caption-content">
+                  <div class="project-category text-faded">
+                    Category
+                  </div>
+                  <div class="project-name">
+                    Project Name
+                  </div>
+                </div>
+              </div>
+            </a>
+          </div>
+          <div class="col-lg-4 col-sm-6">
+            <a class="portfolio-box" href="/static/img/portfolio/fullsize/3.jpg">
+              <img class="img-fluid" src="/static/img/portfolio/thumbnails/3.jpg" alt="">
+              <div class="portfolio-box-caption">
+                <div class="portfolio-box-caption-content">
+                  <div class="project-category text-faded">
+                    Category
+                  </div>
+                  <div class="project-name">
+                    Project Name
+                  </div>
+                </div>
+              </div>
+            </a>
+          </div>
+          <div class="col-lg-4 col-sm-6">
+            <a class="portfolio-box" href="/static/img/portfolio/fullsize/4.jpg">
+              <img class="img-fluid" src="/static/img/portfolio/thumbnails/4.jpg" alt="">
+              <div class="portfolio-box-caption">
+                <div class="portfolio-box-caption-content">
+                  <div class="project-category text-faded">
+                    Category
+                  </div>
+                  <div class="project-name">
+                    Project Name
+                  </div>
+                </div>
+              </div>
+            </a>
+          </div>
+          <div class="col-lg-4 col-sm-6">
+            <a class="portfolio-box" href="img/portfolio/fullsize/5.jpg">
+              <img class="img-fluid" src="img/portfolio/thumbnails/5.jpg" alt="">
+              <div class="portfolio-box-caption">
+                <div class="portfolio-box-caption-content">
+                  <div class="project-category text-faded">
+                    Category
+                  </div>
+                  <div class="project-name">
+                    Project Name
+                  </div>
+                </div>
+              </div>
+            </a>
+          </div>
+          <div class="col-lg-4 col-sm-6">
+            <a class="portfolio-box" href="img/portfolio/fullsize/6.jpg">
+              <img class="img-fluid" src="img/portfolio/thumbnails/6.jpg" alt="">
+              <div class="portfolio-box-caption">
+                <div class="portfolio-box-caption-content">
+                  <div class="project-category text-faded">
+                    Category
+                  </div>
+                  <div class="project-name">
+                    Project Name
+                  </div>
+                </div>
+              </div>
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="call-to-action bg-dark">
+      <div class="container text-center">
+        <h2>Free Download at Start Bootstrap!</h2>
+        <a class="btn btn-default btn-xl sr-button" href="http://startbootstrap.com/template-overviews/creative/">Download Now!</a>
+      </div>
+    </div>
+
+    <section id="contact">
+      <div class="container">
+        <div class="row">
+          <div class="col-lg-8 mx-auto text-center">
+            <h2 class="section-heading">Let's Get In Touch!</h2>
+            <hr class="primary">
+            <p>Ready to start your next project with us? That's great! Give us a call or send us an email and we will get back to you as soon as possible!</p>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-lg-4 ml-auto text-center">
+            <i class="fa fa-phone fa-3x sr-contact"></i>
+            <p>123-456-6789</p>
+          </div>
+          <div class="col-lg-4 mr-auto text-center">
+            <i class="fa fa-envelope-o fa-3x sr-contact"></i>
+            <p>
+              <a href="mailto:your-email@your-domain.com">feedback@startbootstrap.com</a>
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Bootstrap core JavaScript -->
+    <script src="vendor/jquery/jquery.min.js"></script>
+    <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Plugin JavaScript -->
+    <script src="vendor/jquery-easing/jquery.easing.min.js"></script>
+    <script src="vendor/scrollreveal/scrollreveal.min.js"></script>
+    <script src="vendor/magnific-popup/jquery.magnific-popup.min.js"></script>
+
+    <!-- Custom scripts for this template -->
+    <script src={{ url_for('static', filename="js/creative.min.js") }}></script>
+    
+
+  </body>
+
+</html>
