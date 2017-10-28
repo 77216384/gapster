@@ -53,9 +53,12 @@ class DistractorSet(object):
 
     def filter_duplicates(self, distractors):
         non_duplicates = set()
-        for sd in distractors:
-            if sd.text not in {nd.text for nd in non_duplicates}:
-                non_duplicates.add(sd)
+        non_dup_set = set()
+        
+        for d in distractors:
+            if d.text not in non_dup_set:
+                non_duplicates.add(d)
+                non_dup_set.add(d.text)
         return non_duplicates
 
     def remove_distractor_in_answer(self, distractors):
@@ -197,9 +200,17 @@ class DistractorSet(object):
         return distractors
 
     def make_distractors(self):
+        #print(len(self.candidate_distractors))
+        #for d in self.candidate_distractors:
+        #    print(d)
+
         non_dup_overlaps = self.initial_filter(self.candidate_distractors)
         distractors = self.get_similarities_to_answer(non_dup_overlaps)
         sorted_distractors = self.sort_distractors(distractors)
+
+        #print(len(sorted_distractors))
+        #for sd in self.sort_distractors(sorted_distractors):
+        #    print(sd)
         
         sorted_distractors = sorted_distractors[:50]
 
@@ -220,9 +231,13 @@ class DistractorSet(object):
 
         #this last filter returns a list which should be sorted...
         sorted_distractors = self.ner_bubble_up(self.sort_distractors(sorted_distractors))
+
+        #print(len(sorted_distractors))
+        #for sd in self.sort_distractors(sorted_distractors):
+        #    print(sd)
         
-        for sd in sorted_distractors[:3]:
-            print(sd[0][0].ent_type_)
+        #for sd in sorted_distractors[:3]:
+        #    print(sd[0][0].ent_type_)
 
         output = []
         if self.spacy_answer[0].tag_ == 'DT':
@@ -241,8 +256,8 @@ class DistractorSet(object):
             for sd in sorted_distractors:
                 output.append(sd[0].text.capitalize())
 
-        for o in output[:3]:
-            print(o)
+        #for o in output[:3]:
+        #    print(o)
 
         return output[:3]
 

@@ -1,9 +1,8 @@
-#from sumy.summarizers.sum_basic import SumBasicSummarizer as Summarizer
 from __future__ import unicode_literals, division, print_function
 
 from semantic import *
 
-from sumy.summarizers.lsa import LsaSummarizer as Summarizer
+from sumy.summarizers.sum_basic import SumBasicSummarizer as Summarizer
 from sumy.parsers.html import HtmlParser
 from sumy.parsers.plaintext import PlaintextParser
 from sumy.nlp.tokenizers import Tokenizer
