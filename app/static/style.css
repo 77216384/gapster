@@ -18,8 +18,16 @@
 	margin-top: 1em;
 }
 
+.spacer {
+  height: 10em;
+}
+
 .choiceButton {
   margin-top: .5em;
+}
+
+.fa {
+  cursor: pointer;
 }
 
 #articleTitle {
@@ -27,6 +35,13 @@
   margin-top: .33em;
   font-size: 2em;
   text-align: left;
+}
+
+#loadingText {
+  font-family: Arial, sans-serif;
+  color: white;
+  margin-top: .25em;
+  text-align: center;
 }
 
 #questionBox {

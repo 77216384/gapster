@@ -4,7 +4,7 @@ var answer = '';
 
 $('.dropdown-item').click(function(e){
   e.preventDefault();
-  $('#questionBox').fadeOut();
+  $('#questionBox').hide();
   $('#articleTitle').text('');
   $('#questionText').text('');
   $('#choiceOne').text('').attr('class', 'btn btn-outline-primary choiceButton').show();
@@ -37,6 +37,10 @@ $('.dropdown-item').click(function(e){
       });
 		}
 	});
+});
+
+$('.fa-times-circle').click(function(e){
+  $('#questionBox').hide();
 });
 
 $('.choiceButton').click(function(e){

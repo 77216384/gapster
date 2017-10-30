@@ -75,7 +75,7 @@
             <h2 class="section-heading text-white">Experience Gapster first-hand</h2>
             <!-- <p class="demoText">Choose a topic and a random article from Wikipedia is sent to Gapster's power algorithms to output a multiple choice question in real-time.</p> -->
             <div class="dropdown">
-              <button class="btn btn btn-outline-light btn-xl dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Generate a question by choosing a topic</button> 
+              <button class="btn btn btn-outline-light btn-xl dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Choose a topic</button> 
             <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
               <a class="dropdown-item" id="art" href="#">Arts</a>
               <a class="dropdown-item" id="history" href="#">History</a>
@@ -85,10 +85,12 @@
               <a class="dropdown-item" id="math" href="#">Mathematics</a>
             </div>
           </div>
-          <div class="loader" id="questionLoading"></div>  
-            <!-- <a class="btn btn-default btn-xl js-scroll-trigger" href="#services">Get Started!</a> -->
-            
+          <div id="questionLoading">
+            <div class="loader"></div> 
+            <div id="loadingText">generating your question from wikipedia</div>
+          </div>
             <div id="questionBox">
+              <i class="fa fa-times-circle fa-pull-right fa-2x" aria-hidden="true"></i>
               <div id="articleTitle"></div>
               <div id="question">
                 
@@ -101,6 +103,7 @@
                 </div>
               </div>
             </div>
+            <div class="spacer"></div>
           </div>
         </div>
       </div>
