@@ -22,9 +22,16 @@ nlp = spacy.load('en_core_web_md')
 def index():
     return render_template('index.html')
 
-@app.route("/fetch_article/napoleon")
-def get_demo_article():
-	url = 'https://en.wikipedia.org/wiki/Napoleonic_Wars'
+@app.route("/fetch_article/<topic>")
+def get_demo_article(topic):
+	article_dict = {
+		'napoleon': 'https://en.wikipedia.org/wiki/Napoleonic_Wars',
+		'snoop': 'https://en.wikipedia.org/wiki/Snoop_Dogg',
+		'lincoln': 'https://en.wikipedia.org/wiki/Abraham_Lincoln',
+		'buddhism': 'https://en.wikipedia.org/wiki/Buddhism',
+		'wormhole': 'https://en.wikipedia.org/wiki/Wormhole'
+	}
+	url = article_dict[topic]
 	res = requests.get(url)
 	html = bs(res.content, 'lxml')
 	article = " ".join([p.text for p in html.select('#mw-content-text p')])

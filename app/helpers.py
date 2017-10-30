@@ -2,7 +2,9 @@ from __future__ import unicode_literals, division, print_function
 
 from semantic import *
 
-from sumy.summarizers.sum_basic import SumBasicSummarizer as Summarizer
+#from sumy.summarizers.sum_basic import SumBasicSummarizer as Summarizer
+#from sumy.summarizers.lex_rank import LexRankSummarizer as Summarizer
+from sumy.summarizers.lsa import LsaSummarizer as Summarizer
 from sumy.parsers.html import HtmlParser
 from sumy.parsers.plaintext import PlaintextParser
 from sumy.nlp.tokenizers import Tokenizer
@@ -26,20 +28,34 @@ import nltk
 import copy
 
 def get_matching_ents(spacy_answer, spacy_text):
-    return [ent for ent in spacy_text.ents if ent[0].ent_type_ == spacy_answer[0].ent_type_]
+    return [ent for ent in spacy_text.ents if ent[-1].ent_type_ == spacy_answer[-1].ent_type_]
 
 def check_question_quality(question, spacy_text):
-    if question['spacy_answer'][0].ent_type_ != '':
+    if question['spacy_answer'][-1].ent_type_ != '':
+        print(question['spacy_answer'][-1].ent_type_)
         matching_ents = get_matching_ents(question['spacy_answer'], spacy_text)
         if len(matching_ents) >= 4:
-            question.update({'quality':True})
+            question.update({'quality': True})
             question.update({'matching_ents': matching_ents})
+            print("QUESTION:", question['question'])
+            print("ANSWER:", question['answer'])
+            print("ENT TYPE:", question['spacy_answer'][-1].ent_type_)
+            print("MATCHING ENTS:", question['matching_ents'])
         else:
-            question.update({'quality':False})
+            question.update({'quality': False})
             question.update({'matching_ents': matching_ents})
+            print("QUESTION:", question['question'])
+            print("ANSWER:", question['answer'])
+            print("ENT TYPE:", question['spacy_answer'][-1].ent_type_)
+            print("MATCHING ENTS:", question['matching_ents'])
     else:
-        question.update({'quality':True})
+        question.update({'quality': True})
         question.update({'matching_ents': []})
+        print("QUESTION:", question['question'])
+        print("ANSWER:", question['answer'])
+        print("ENT TYPE:", question['spacy_answer'][-1].ent_type_)
+        print("MATCHING ENTS:", question['matching_ents'])
+        
     return question
 
 

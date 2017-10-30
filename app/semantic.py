@@ -115,17 +115,17 @@ class DistractorSet(object):
         return not_in_sentence
 
     def ner_bubble_up(self, sorted_distractors):
-        if self.spacy_answer[0].ent_type_ != '':
-            print("ANSWER NER:", self.spacy_answer[0].ent_type_)
+        if self.spacy_answer[-1].ent_type_ != '':
+            print("ANSWER NER:", self.spacy_answer[-1].ent_type_)
             print("ANSWER ROOT POS:", self.spacy_answer.root.tag_)
             bubbled_ner = []
-            answer_ent_type = self.spacy_answer[0].ent_type_
+            answer_ent_type = self.spacy_answer[-1].ent_type_
             last_ent_index = 0
 
             for i, sd in enumerate(sorted_distractors):
 
-                if sd[0][0].ent_type_ == answer_ent_type:
-                    print(sd[0], sd[0][0].ent_type_)
+                if sd[0][-1].ent_type_ == answer_ent_type:
+                    print(sd[0], sd[0][-1].ent_type_)
 
                     if last_ent_index < i or last_ent_index == 0:
                         if last_ent_index == 0:
@@ -163,7 +163,7 @@ class DistractorSet(object):
         return synset
 
     def add_similarity_score(self, sorted_distractors):
-        if self.spacy_answer.root.pos_ == 'NOUN' and self.spacy_answer[0].ent_type_ == '' and self.spacy_answer.root.tag_ not in 'NNPS':
+        if self.spacy_answer.root.pos_ == 'NOUN' and self.spacy_answer[-1].ent_type_ == '' and self.spacy_answer.root.tag_ not in 'NNPS':
             sorted_distractors = list(sorted_distractors)
             answer_synset = self.get_synset(self.spacy_answer, sent=self.spacy_sentence)
             scores = []
@@ -192,52 +192,35 @@ class DistractorSet(object):
         else:
             return sorted_distractors
 
-    def initial_filter(self, distractors):
-        distractors = self.filter_duplicates(distractors)
-        distractors = self.remove_common_root_with_answer(distractors)
+    def make_distractors(self):
+
+        distractors = self.filter_duplicates(self.candidate_distractors)
+        if len(self.matching_ents) < 4 or self.spacy_answer[-1].ent_type_ == 'GPE':
+            distractors = self.remove_common_root_with_answer(distractors) # this is messing everything up!
         distractors = self.remove_distractor_in_answer(distractors)
         distractors = self.remove_answer_in_distractor(distractors)
-        return distractors
-
-    def make_distractors(self):
-        #print(len(self.candidate_distractors))
-        #for d in self.candidate_distractors:
-        #    print(d)
-
-        non_dup_overlaps = self.initial_filter(self.candidate_distractors)
-        distractors = self.get_similarities_to_answer(non_dup_overlaps)
+        distractors = self.get_similarities_to_answer(distractors)
         sorted_distractors = self.sort_distractors(distractors)
 
-        #print(len(sorted_distractors))
-        #for sd in self.sort_distractors(sorted_distractors):
-        #    print(sd)
-        
+        for sd in self.sort_distractors(sorted_distractors):
+            print(sd)
+
         sorted_distractors = sorted_distractors[:50]
+
 
         sorted_distractors = self.filter_non_temporal(self.sort_distractors(sorted_distractors))
         sorted_distractors = self.filter_subsets(self.sort_distractors(sorted_distractors))
-        #print("Subsets Filter")
-        #print("sorted: ", self.sort_distractors(sorted_distractors))
-        sorted_distractors = self.filter_root_duplicates(self.sort_distractors(sorted_distractors))
-        #print("Root Duplcate Filter")
-        #print("sorted: ", self.sort_distractors(sorted_distractors))
+        if len(self.matching_ents) < 4 or self.spacy_answer[-1].ent_type_ == 'GPE':
+            sorted_distractors = self.filter_root_duplicates(self.sort_distractors(sorted_distractors))
         sorted_distractors = self.filter_unmatching_roots(self.sort_distractors(sorted_distractors))
-        #print("Unmatching Root Filter")
-        #print("sorted: ", self.sort_distractors(sorted_distractors))
         sorted_distractors = self.filter_insentence_ners(self.sort_distractors(sorted_distractors))
-        #print("Insentence NER Filter")
-        #print("sorted: ", self.sort_distractors(sorted_distractors))
         sorted_distractors = self.add_similarity_score(self.sort_distractors(sorted_distractors))
 
         #this last filter returns a list which should be sorted...
         sorted_distractors = self.ner_bubble_up(self.sort_distractors(sorted_distractors))
 
-        #print(len(sorted_distractors))
-        #for sd in self.sort_distractors(sorted_distractors):
-        #    print(sd)
-        
-        #for sd in sorted_distractors[:3]:
-        #    print(sd[0][0].ent_type_)
+        for sd in self.sort_distractors(sorted_distractors):
+            print(sd)
 
         output = []
         if self.spacy_answer[0].tag_ == 'DT':
@@ -246,18 +229,15 @@ class DistractorSet(object):
 
             for sd in sorted_distractors:
                 if sd[0][0].tag_ == 'DT' and sd[0][0].text != article:
-                    output.append((article+" "+sd[0][1:].text.lower(), sd[1]))
+                    output.append(article+" "+sd[0][1:].text.lower())
                 elif sd[0][0].tag_ != 'DT':
-                    output.append((article+" "+sd[0].text.lower(), sd[1]))
+                    output.append(article+" "+sd[0].text.lower())
                 else:
-                    output.append((sd[0].text.lower(), sd[1]))
+                    output.append(sd[0].text.lower())
 
         else:
             for sd in sorted_distractors:
                 output.append(sd[0].text.capitalize())
-
-        #for o in output[:3]:
-        #    print(o)
 
         return output[:3]
 
