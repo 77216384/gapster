@@ -4,6 +4,11 @@
 	text-align: left;
 }
 
+.demoText {
+  font-family: 'Merriweather', 'Helvetica Neue', Arial, sans-serif;
+  color: white;
+}
+
 #choices {
 	color: white;
 	margin-top: 1em;
@@ -11,6 +16,12 @@
 
 .choiceButton {
   margin-top: .5em;
+}
+
+#articleTitle {
+  color: white;
+  margin-top: 2em;
+  font-size: 2em;
 }
 
 

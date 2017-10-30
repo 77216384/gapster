@@ -24,7 +24,7 @@
     
 
     <!-- Custom styles for this template -->
-    <link href={{ url_for('static', filename="css/creative.min.css") }} rel="stylesheet">
+    <link href={{ url_for('static', filename="css/creative.css") }} rel="stylesheet">
     <link href={{ url_for('static', filename="style.css") }} rel="stylesheet">
 
   </head>
@@ -41,13 +41,13 @@
         <div class="collapse navbar-collapse" id="navbarResponsive">
           <ul class="navbar-nav ml-auto">
             <li class="nav-item">
-              <a class="nav-link js-scroll-trigger" href="#about">About</a>
+              <a class="nav-link js-scroll-trigger" href="#about">Demo</a>
             </li>
             <li class="nav-item">
-              <a class="nav-link js-scroll-trigger" href="#services">Services</a>
+              <a class="nav-link js-scroll-trigger" href="#services">About</a>
             </li>
             <li class="nav-item">
-              <a class="nav-link js-scroll-trigger" href="#portfolio">Portfolio</a>
+              <a class="nav-link js-scroll-trigger" href="#portfolio">Technologies</a>
             </li>
             <li class="nav-item">
               <a class="nav-link js-scroll-trigger" href="#contact">Contact</a>
@@ -62,8 +62,8 @@
         <div class="header-content-inner">
           <h1 id="homeHeading">Intelligent<br/>Question Generation</h1>
           <hr>
-          <p>Start Bootstrap can help you build better websites using the Bootstrap CSS framework! Just download your template and start going, no strings attached!</p>
-          <a class="btn btn-primary btn-xl js-scroll-trigger" href="#about">Find Out More</a>
+          <p>Gapster takes text on any topic imaginable and returns fill-in-the-blank, multiple choices questions to challenge and engage your audience.</p>
+          <a class="btn btn-outline-light btn-xl js-scroll-trigger" href="#about">Play the demo</a>
         </div>
       </div>
     </header>
@@ -72,10 +72,11 @@
       <div class="container">
         <div class="row">
           <div class="col-lg-8 mx-auto text-center">
-            <h2 class="section-heading text-white">Try the demo and see for yourself!</h2>
+            <h2 class="section-heading text-white">Experience Gapster first-hand</h2>
+            <p class="demoText">By choosing a topic, a random article from that topic will be selected from Wikipedia and sent to Gapster's power algorithms to output a multiple choice question in real-time.</p>
             <div class="dropdown">
-              <button class="btn btn-primary btn-xl dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Choose an topic
-            </button>
+              <button class="btn btn btn-outline-light btn-xl dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Choose an topic
+            </button> 
             <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
               <a class="dropdown-item" id="arts" href="#">History</a>
               <a class="dropdown-item" id="lincoln" href="#">Abraham Lincoln</a>
@@ -86,7 +87,7 @@
           </div>
             
             <!-- <a class="btn btn-default btn-xl js-scroll-trigger" href="#services">Get Started!</a> -->
-            <div id="articleTitle"><h3></h3></div>
+            <div id="articleTitle"></div>
             <div id="question">
               <div class="loader" id="questionLoading">
               </div>

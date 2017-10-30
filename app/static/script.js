@@ -3,7 +3,7 @@ var answer = '';
 
 $('#arts').click(function(e){
   e.preventDefault();
-  $('#articleTitle h3').text('');
+  $('#articleTitle').text('');
   $('#questionText').text('');
   $('#choiceOne').text('').attr('class', 'btn btn-outline-light choiceButton').show();
   $('#choiceTwo').text('').attr('class', 'btn btn-outline-light choiceButton').show();
@@ -22,7 +22,7 @@ $('#arts').click(function(e){
         contentType: "application/json; charset=utf-8",
         success: function(data){
           $('#questionLoading').hide();
-          $('#articleTitle h3').text(articleTitle);
+          $('#articleTitle').text(articleTitle);
           $('#questionText').text(data.question);
           answer = data.answer;
           $('#choiceOne').text(data.answer);

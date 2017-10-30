@@ -41,7 +41,7 @@ p {
   margin-bottom: 20px; }
 
 .bg-primary {
-  background-color: #F05F40 !important; }
+  background-color: #5a40ef !important; }
 
 .bg-dark {
   color: white;
@@ -147,7 +147,7 @@ header.masthead {
   min-height: auto;
   text-align: center;
   color: white;
-  background-image: url("../img/header.jpg");
+  background-image: url("../img/4.jpg");
   background-position: center;
   -webkit-background-size: cover;
   -moz-background-size: cover;
