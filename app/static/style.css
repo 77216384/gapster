@@ -1,16 +1,20 @@
 #questionText {
-	color: white;
+	color: #4a3c9c;
 	margin-top: 1em;
 	text-align: left;
 }
 
+#dropdownMenuButton {
+  margin-top: 1.5em;
+}
+
 .demoText {
-  font-family: 'Merriweather', 'Helvetica Neue', Arial, sans-serif;
+  font-family: Arial, sans-serif;
   color: white;
 }
 
 #choices {
-	color: white;
+	color: black;
 	margin-top: 1em;
 }
 
@@ -19,12 +23,27 @@
 }
 
 #articleTitle {
-  color: white;
-  margin-top: 2em;
+  color: #4a3c9c;
+  margin-top: .33em;
   font-size: 2em;
+  text-align: left;
 }
 
+#questionBox {
+  margin-top: 1em;
+  background: white;
+  color: #4a3c9c;
+  border-radius: 25px;
+  padding: 20px; 
+}
 
+.btn-outline-primary {
+  color: #4a3c9c;
+}
+  .btn-outline-primary:hover {
+    color: white;
+    border-color: #4a3c9c;
+    background-color: #4a3c9c; }
 
 .loader,
 .loader:before,
@@ -83,3 +102,6 @@
     box-shadow: 0 2.5em 0 0;
   }
 }
+
+
+

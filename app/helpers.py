@@ -26,6 +26,7 @@ import re
 import pandas
 import nltk
 import copy
+import random
 
 def get_matching_ents(spacy_answer, spacy_text):
     return [ent for ent in spacy_text.ents if ent[-1].ent_type_ == spacy_answer[-1].ent_type_]
@@ -90,3 +91,16 @@ def get_srl(sentence):
     ascii_sentence = unicodedata.normalize('NFKD', sentence).encode('ascii','ignore')
     annotator=Annotator()
     return annotator.getAnnotations(ascii_sentence)['srl']
+
+def get_article_url(topic):
+    topic_dict = {
+        'art': ['https://en.wikipedia.org/wiki/Othello'],
+        'people': ['https://en.wikipedia.org/wiki/William_Henry_Bragg', 'https://en.wikipedia.org/wiki/Georges_Clemenceau', 'https://en.wikipedia.org/wiki/Chanakya', 'https://en.wikipedia.org/wiki/Muhammad', 'https://en.wikipedia.org/wiki/Hayreddin_Barbarossa', 'https://en.wikipedia.org/wiki/Robert_Johnson', 'https://en.wikipedia.org/wiki/Robert_Johnson', 'https://en.wikipedia.org/wiki/Robert_Guiscard', 'https://en.wikipedia.org/wiki/Robert_Guiscard', 'https://en.wikipedia.org/wiki/Thomas_Edison', 'https://en.wikipedia.org/wiki/Lionel_Messi', 'https://en.wikipedia.org/wiki/Led_Zeppelin', 'https://en.wikipedia.org/wiki/William_Harvey', 'https://en.wikipedia.org/wiki/Jomo_Kenyatta', 'https://en.wikipedia.org/wiki/Abraham', 'https://en.wikipedia.org/wiki/Hokusai', 'https://en.wikipedia.org/wiki/Claude_L%C3%A9vi-Strauss', 'https://en.wikipedia.org/wiki/Ignacy_%C5%81ukasiewicz', 'https://en.wikipedia.org/wiki/Li_Ning', 'https://en.wikipedia.org/wiki/Pierre_Boulez', 'https://en.wikipedia.org/wiki/Laurence_Olivier', 'https://en.wikipedia.org/wiki/Eduard_Shevardnadze', 'https://en.wikipedia.org/wiki/Isaiah_Berlin', 'https://en.wikipedia.org/wiki/William_Pitt_the_Younger', 'https://en.wikipedia.org/wiki/Tertullian', 'https://en.wikipedia.org/wiki/Wolfgang_Amadeus_Mozart', 'https://en.wikipedia.org/wiki/Antoine_Lavoisier', 'https://en.wikipedia.org/wiki/Emperor_Taizu_of_Song'],
+        'society': ['https://en.wikipedia.org/wiki/Afroasiatic_languages', 'https://en.wikipedia.org/wiki/Multilingualism', 'https://en.wikipedia.org/wiki/Yoruba_people', 'https://en.wikipedia.org/wiki/Wu_Chinese', 'https://en.wikipedia.org/wiki/Javanese_language', 'https://en.wikipedia.org/wiki/Looney_Tunes', 'https://en.wikipedia.org/wiki/Rights', 'https://en.wikipedia.org/wiki/University_of_London', 'https://en.wikipedia.org/wiki/Oedipus_complex', 'https://en.wikipedia.org/wiki/Orphanage', 'https://en.wikipedia.org/wiki/Commonwealth_of_Independent_States', 'https://en.wikipedia.org/wiki/Morse_code', 'https://en.wikipedia.org/wiki/Peasant', 'https://en.wikipedia.org/wiki/Honour', 'https://en.wikipedia.org/wiki/Ethnography', 'https://en.wikipedia.org/wiki/Middle_English'],
+        'history': ['https://en.wikipedia.org/wiki/Archaeology', 'https://en.wikipedia.org/wiki/History_of_aviation', 'https://en.wikipedia.org/wiki/History_of_geography', 'https://en.wikipedia.org/wiki/Legal_history', 'https://en.wikipedia.org/wiki/History_of_transport', 'https://en.wikipedia.org/wiki/Archaeological_culture', 'https://en.wikipedia.org/wiki/Geological_history_of_Earth', 'https://en.wikipedia.org/wiki/History_of_atheism', 'https://en.wikipedia.org/wiki/Maritime_history'],
+        'science': ['https://en.wikipedia.org/wiki/Substitution_reaction'],
+        'math': ['https://en.wikipedia.org/wiki/Algorithm', 'https://en.wikipedia.org/wiki/Tessellation', 'https://en.wikipedia.org/wiki/Plane_(geometry)', 'https://en.wikipedia.org/wiki/0', 'https://en.wikipedia.org/wiki/Three-dimensional_space', 'https://en.wikipedia.org/wiki/Axiom', 'https://en.wikipedia.org/wiki/Square', 'https://en.wikipedia.org/wiki/Topological_space', 'https://en.wikipedia.org/wiki/Pythagorean_theorem', 'https://en.wikipedia.org/wiki/Data_structure', 'https://en.wikipedia.org/wiki/Homology_(mathematics)', 'https://en.wikipedia.org/wiki/Trigonometry', 'https://en.wikipedia.org/wiki/Convex_set', 'https://en.wikipedia.org/wiki/Metric_space', 'https://en.wikipedia.org/wiki/Mathematics', 'https://en.wikipedia.org/wiki/Pi', 'https://en.wikipedia.org/wiki/Data_compression', 'https://en.wikipedia.org/wiki/Constant_(mathematics)', 'https://en.wikipedia.org/wiki/Naive_set_theory', 'https://en.wikipedia.org/wiki/Shape', 'https://en.wikipedia.org/wiki/Rational_number']
+    }
+
+    return random.choice(topic_dict[topic])
+

@@ -63,7 +63,7 @@
           <h1 id="homeHeading">Intelligent<br/>Question Generation</h1>
           <hr>
           <p>Gapster takes text on any topic imaginable and returns fill-in-the-blank, multiple choices questions to challenge and engage your audience.</p>
-          <a class="btn btn-outline-light btn-xl js-scroll-trigger" href="#about">Play the demo</a>
+          <a class="btn btn-outline-light btn-xl js-scroll-trigger" href="#about">Try the demo</a>
         </div>
       </div>
     </header>
@@ -73,30 +73,32 @@
         <div class="row">
           <div class="col-lg-8 mx-auto text-center">
             <h2 class="section-heading text-white">Experience Gapster first-hand</h2>
-            <p class="demoText">By choosing a topic, a random article from that topic will be selected from Wikipedia and sent to Gapster's power algorithms to output a multiple choice question in real-time.</p>
+            <!-- <p class="demoText">Choose a topic and a random article from Wikipedia is sent to Gapster's power algorithms to output a multiple choice question in real-time.</p> -->
             <div class="dropdown">
-              <button class="btn btn btn-outline-light btn-xl dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Choose an topic
-            </button> 
+              <button class="btn btn btn-outline-light btn-xl dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Generate a question by choosing a topic</button> 
             <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-              <a class="dropdown-item" id="arts" href="#">History</a>
-              <a class="dropdown-item" id="lincoln" href="#">Abraham Lincoln</a>
-              <a class="dropdown-item" id="wormhole" href="#">Wormhole</a>
-              <a class="dropdown-item" id="buddhism" href="#">Buddhism</a>
-              <a class="dropdown-item" id="snoop" href="#">Snoop Dog</a>
+              <a class="dropdown-item" id="art" href="#">Arts</a>
+              <a class="dropdown-item" id="history" href="#">History</a>
+              <a class="dropdown-item" id="people" href="#">People</a>
+              <a class="dropdown-item" id="society" href="#">Society</a>
+              <a class="dropdown-item" id="science" href="#">Physical Sciences</a>
+              <a class="dropdown-item" id="math" href="#">Mathematics</a>
             </div>
           </div>
-            
+          <div class="loader" id="questionLoading"></div>  
             <!-- <a class="btn btn-default btn-xl js-scroll-trigger" href="#services">Get Started!</a> -->
-            <div id="articleTitle"></div>
-            <div id="question">
-              <div class="loader" id="questionLoading">
-              </div>
-              <div id="questionText"></div>
-              <div id="choices"><br/>
-                <button type="button" id="choiceOne" class="btn btn-outline-light choiceButton"></button><br/>
-                <button type="button" id="choiceTwo" class="btn btn-outline-light choiceButton"></button><br/>
-                <button type="button" id="choiceThree" class="btn btn-outline-light choiceButton"></button><br/>
-                <button type="button" id="choiceFour" class="btn btn-outline-light choiceButton"></button>
+            
+            <div id="questionBox">
+              <div id="articleTitle"></div>
+              <div id="question">
+                
+                <div id="questionText"></div>
+                <div id="choices"><br/>
+                  <button type="button" id="choiceOne" class="btn btn-outline-primary choiceButton"></button><br/>
+                  <button type="button" id="choiceTwo" class="btn btn-outline-primary choiceButton"></button><br/>
+                  <button type="button" id="choiceThree" class="btn btn-outline-primary choiceButton"></button><br/>
+                  <button type="button" id="choiceFour" class="btn btn-outline-primary choiceButton"></button>
+                </div>
               </div>
             </div>
           </div>

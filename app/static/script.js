@@ -1,18 +1,20 @@
 $('#questionLoading').hide();
+$('#questionBox').hide();
 var answer = '';
 
-$('#arts').click(function(e){
+$('.dropdown-item').click(function(e){
   e.preventDefault();
+  $('#questionBox').fadeOut();
   $('#articleTitle').text('');
   $('#questionText').text('');
-  $('#choiceOne').text('').attr('class', 'btn btn-outline-light choiceButton').show();
-  $('#choiceTwo').text('').attr('class', 'btn btn-outline-light choiceButton').show();
-  $('#choiceThree').text('').attr('class', 'btn btn-outline-light choiceButton').show();
-  $('#choiceFour').text('').attr('class', 'btn btn-outline-light choiceButton').show();
+  $('#choiceOne').text('').attr('class', 'btn btn-outline-primary choiceButton').show();
+  $('#choiceTwo').text('').attr('class', 'btn btn-outline-primary choiceButton').show();
+  $('#choiceThree').text('').attr('class', 'btn btn-outline-primary choiceButton').show();
+  $('#choiceFour').text('').attr('class', 'btn btn-outline-primary choiceButton').show();
   $('#questionLoading').show();
 	$.ajax({
 		type: "GET",
-		url: "/topic",
+		url: "/topic/"+e.target.id,
 		success: function(data){
       articleTitle = data.title;
       $.ajax({
@@ -21,10 +23,11 @@ $('#arts').click(function(e){
         data: JSON.stringify(data),
         contentType: "application/json; charset=utf-8",
         success: function(data){
-          $('#questionLoading').hide();
-          $('#articleTitle').text(articleTitle);
-          $('#questionText').text(data.question);
           answer = data.answer;
+          $('#questionLoading').hide();
+          $('#questionBox').fadeIn();
+          $('#articleTitle').text('Article Title: '+articleTitle);
+          $('#questionText').text(data.question);
           $('#choiceOne').text(data.answer);
           $('#choiceTwo').text(data.distractors[0]);
           $('#choiceThree').text(data.distractors[1]);
@@ -39,7 +42,7 @@ $('#arts').click(function(e){
 $('.choiceButton').click(function(e){
   e.preventDefault();
   if ($(e.target).text() == answer) {
-    $(e.target).addClass('btn-success').removeClass('btn-outline-light');
+    $(e.target).addClass('btn-success').removeClass('btn-outline-primary');
     var buttons = $('.choiceButton');
     for (i = 0; i < buttons.length; i++) { 
       if ($(buttons[i]).text() != answer) {
@@ -47,6 +50,6 @@ $('.choiceButton').click(function(e){
       }
     }
   } else {
-    $(e.target).addClass('btn-danger').removeClass('btn-outline-light');
+    $(e.target).addClass('btn-danger').removeClass('btn-outline-primary');
   }
 });
