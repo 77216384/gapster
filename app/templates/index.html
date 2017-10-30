@@ -74,10 +74,10 @@
           <div class="col-lg-8 mx-auto text-center">
             <h2 class="section-heading text-white">Try the demo and see for yourself!</h2>
             <div class="dropdown">
-              <button class="btn btn-primary btn-xl dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Choose an article
+              <button class="btn btn-primary btn-xl dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Choose an topic
             </button>
             <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-              <a class="dropdown-item" id="napoleon" href="#">Napoleonic Wars</a>
+              <a class="dropdown-item" id="arts" href="#">History</a>
               <a class="dropdown-item" id="lincoln" href="#">Abraham Lincoln</a>
               <a class="dropdown-item" id="wormhole" href="#">Wormhole</a>
               <a class="dropdown-item" id="buddhism" href="#">Buddhism</a>
@@ -86,15 +86,16 @@
           </div>
             
             <!-- <a class="btn btn-default btn-xl js-scroll-trigger" href="#services">Get Started!</a> -->
+            <div id="articleTitle"><h3></h3></div>
             <div id="question">
               <div class="loader" id="questionLoading">
               </div>
               <div id="questionText"></div>
-              <div id="choices">
-                <div id="choiceOne"></div>
-                <div id="choiceTwo"></div>
-                <div id="choiceThree"></div>
-                <div id="choiceFour"></div>
+              <div id="choices"><br/>
+                <button type="button" id="choiceOne" class="btn btn-outline-light choiceButton"></button><br/>
+                <button type="button" id="choiceTwo" class="btn btn-outline-light choiceButton"></button><br/>
+                <button type="button" id="choiceThree" class="btn btn-outline-light choiceButton"></button><br/>
+                <button type="button" id="choiceFour" class="btn btn-outline-light choiceButton"></button>
               </div>
             </div>
           </div>

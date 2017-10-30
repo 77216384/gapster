@@ -93,7 +93,7 @@ class DistractorSet(object):
     def filter_unmatching_roots(self, sorted_distractors):
         matching_roots = set()
         for sd in sorted_distractors:
-            if sd[0].root.tag_ == self.spacy_answer.root.tag_:
+            if sd[0].root.pos_ == self.spacy_answer.root.pos_:
                 matching_roots.add(sd)
         return matching_roots
 
@@ -237,7 +237,10 @@ class DistractorSet(object):
 
         else:
             for sd in sorted_distractors:
-                output.append(sd[0].text.capitalize())
+                if sd[0][0].tag_ == 'DT':
+                    output.append(sd[0][1:].text.lower())
+                else:
+                    output.append(sd[0].text.lower())
 
         return output[:3]
 
