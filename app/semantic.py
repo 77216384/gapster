@@ -180,6 +180,7 @@ class DistractorSet(object):
             scores = np.array(scores)
             scores = scores/scores.max()
 
+            print("similarities:::")
             for i, sd in enumerate(sorted_distractors):
                 print(sd[0], scores[i])
 
@@ -378,6 +379,7 @@ class Blanker(object):
                     blanked_sentence += ('_'+token.whitespace_)
                 else:
                     blanked_sentence += (token.text+token.whitespace_)
+            print(blanked_sentence)
             all_blanks.append({'question': blanked_sentence, 'answer': answer, 'sentence': self.spacy.text, 'spacy_sentence': self.spacy, 'spacy_answer': spacy_answer, 'srl':self.srl})
 
         return all_blanks

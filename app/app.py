@@ -28,29 +28,12 @@ def index():
 
 @app.route("/topic/<topic>")
 def choose_random_article(topic):
-	#r = requests.get('https://en.wikipedia.org/wiki/Wikipedia:Vital_articles/Expanded/People')
-	#url_tags = bs(r.content, 'lxml').select('.column-count-3 a')
-	#base = 'https://en.wikipedia.org'
-	#urls = [(tag.text, base+tag.attrs['href']) for tag in url_tags if 'edit' not in tag.attrs['href'] and 'Vital' not in tag.attrs['href']]
-	#rand = random.randint(0, len(urls)-1)
-	#article_url = urls[rand][1]
-	#article_title = urls[rand][0]
 	article_url = helpers.get_article_url(topic)
 	res = requests.get(article_url)
 	html = bs(res.content, 'lxml')
 	title = html.select('.firstHeading')[0].text
 	article = " ".join([p.text for p in html.select('#mw-content-text p')])
 	data = json={'title': title, 'text': re.sub('\[\d+\]', '', article)}
-	return jsonify(data)
-
-@app.route("/fetch_article/<topic>")
-def get_demo_article(topic):
-	
-	url = article_dict[topic]
-	res = requests.get(url)
-	html = bs(res.content, 'lxml')
-	article = " ".join([p.text for p in html.select('#mw-content-text p')])
-	data = json={'text': re.sub('\[\d+\]', '', article)}
 	return jsonify(data)
 
 @app.route("/question", methods=['POST'])
@@ -62,6 +45,7 @@ def make_question():
 		sentences = helpers.get_best_sentences(text, num=5)
 		
 		sentences_with_srl = []
+
 		for s in sentences:
 			srl = helpers.get_srl(s)
 			sentences_with_srl.append({'sentence':s, 'srl':srl})
