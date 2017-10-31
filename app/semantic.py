@@ -12,10 +12,6 @@ import spacy
 import nltk
 import re
 
-# code a way to send all 5 questions to to the DistractorSet and if a question returns less than 3
-# distractors, iterate to the next one OR keep coding edge cases like 25% higher
-
-# add ability to pass multiple questions/sentences/answers to class
 class DistractorSet(object):
     def __init__(self, question, text, spacy_text, nlp):
         self.nlp = nlp
@@ -116,8 +112,6 @@ class DistractorSet(object):
 
     def ner_bubble_up(self, sorted_distractors):
         if self.spacy_answer[-1].ent_type_ != '':
-            print("ANSWER NER:", self.spacy_answer[-1].ent_type_)
-            print("ANSWER ROOT POS:", self.spacy_answer.root.tag_)
             bubbled_ner = []
             answer_ent_type = self.spacy_answer[-1].ent_type_
             last_ent_index = 0
@@ -125,7 +119,6 @@ class DistractorSet(object):
             for i, sd in enumerate(sorted_distractors):
 
                 if sd[0][-1].ent_type_ == answer_ent_type:
-                    print(sd[0], sd[0][-1].ent_type_)
 
                     if last_ent_index < i or last_ent_index == 0:
                         if last_ent_index == 0:
@@ -180,10 +173,6 @@ class DistractorSet(object):
             scores = np.array(scores)
             scores = scores/scores.max()
 
-            print("similarities:::")
-            for i, sd in enumerate(sorted_distractors):
-                print(sd[0], scores[i])
-
             plus_sim = []
             for i, sd in enumerate(sorted_distractors):
                 plus_sim.append((sd[0], sd[1]+scores[i]))
@@ -203,9 +192,6 @@ class DistractorSet(object):
         distractors = self.get_similarities_to_answer(distractors)
         sorted_distractors = self.sort_distractors(distractors)
 
-        for sd in self.sort_distractors(sorted_distractors):
-            print(sd)
-
         sorted_distractors = sorted_distractors[:50]
 
 
@@ -220,8 +206,6 @@ class DistractorSet(object):
         #this last filter returns a list which should be sorted...
         sorted_distractors = self.ner_bubble_up(self.sort_distractors(sorted_distractors))
 
-        for sd in self.sort_distractors(sorted_distractors):
-            print(sd)
 
         output = []
         if self.spacy_answer[0].tag_ == 'DT':
@@ -379,7 +363,7 @@ class Blanker(object):
                     blanked_sentence += ('_'+token.whitespace_)
                 else:
                     blanked_sentence += (token.text+token.whitespace_)
-            print(blanked_sentence)
+
             all_blanks.append({'question': blanked_sentence, 'answer': answer, 'sentence': self.spacy.text, 'spacy_sentence': self.spacy, 'spacy_answer': spacy_answer, 'srl':self.srl})
 
         return all_blanks
