@@ -67,6 +67,7 @@ def make_question():
 		question = best_questions[0]['question']
 		answer = best_questions[0]['answer']
 		distractors = DistractorSet(best_questions[0], text, spacy_text, nlp).distractors
+		qestion['question'] = re.sub('(_\s)+', '___________ ', question['question'])
 		output = {'question': question, 'answer': answer.lower(), 'distractors': distractors}
 
 		return jsonify(output)
