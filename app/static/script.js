@@ -24,14 +24,22 @@ $('.dropdown-item').click(function(e){
         contentType: "application/json; charset=utf-8",
         success: function(data){
           answer = data.answer;
+          var random_index = Math.floor(Math.random() * 4);
+          var choice_set = [];
+          choice_set[random_index] = data.answer;
+          for (i = 0; i < 4; i++) {
+            if (choice_set[i] == undefined){
+              choice_set[i] = data.distractors.pop();
+            }
+          }
           $('#questionLoading').hide();
           $('#questionBox').fadeIn();
           $('#articleTitle').text('Article Title: '+articleTitle);
           $('#questionText').text(data.question);
-          $('#choiceOne').text(data.answer);
-          $('#choiceTwo').text(data.distractors[0]);
-          $('#choiceThree').text(data.distractors[1]);
-          $('#choiceFour').text(data.distractors[2]);
+          $('#choiceOne').text(choice_set[0]);
+          $('#choiceTwo').text(choice_set[1]);
+          $('#choiceThree').text(choice_set[2]);
+          $('#choiceFour').text(choice_set[3]);
         },
         dataType: 'json'
       });
